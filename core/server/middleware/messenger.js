@@ -1,12 +1,10 @@
 ﻿var authentication = require('./authentication'),
+    messageControllers = require('../controllers/messageControllers'),
     io,
     init;
 
 function onConnection(socket) {
-    var user = socket.request['user']; //from passport.socketio
-    console.log(user.username + ' connected');
-    socket.emit('profile', user);
-    io.emit('chat message', 'bot', user.username + ' just walked in.');
+    messageControllers.onConnection(socket);
     setHandlers(socket);
 }
 
@@ -23,10 +21,8 @@ function setHandlers(socket) {
 init = function (ioServer) {
     io = ioServer;
     io.use(authentication.authorizeIo());
-
-    io.on('connection', function (socket){
-        onConnection(socket);
-    });
+    messageControllers.init(io);
+    io.on('connection', onConnection);
 }
 
 module.exports = init;
