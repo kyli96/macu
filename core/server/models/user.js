@@ -36,6 +36,9 @@ Users = {
             if (err) {
                 fn(err);
             }
+            else if (!data) {
+                fn(new Error('User not found.'));
+            }
             else {
                 fn(null, new User(data));
             }
