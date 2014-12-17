@@ -9,13 +9,8 @@ function onConnection(socket) {
 }
 
 function setHandlers(socket) {
-    socket.on('disconnect', function (){
-        console.log('user disconnected');
-        io.emit('chat message', 'bot', 'someone just left.');
-    });
-    socket.on('chat message', function(user, msg){
-        io.emit('chat message', user, msg);
-    });
+    socket.on('disconnect', messageControllers.onDisconnection);
+    socket.on('sendMessage', messageControllers.onMessage);
 }
 
 init = function (ioServer) {
