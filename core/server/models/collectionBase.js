@@ -54,13 +54,13 @@ CollectionBase.prototype.insertOne = function (obj, fn) {
     });
 }
 
-CollectionBase.prototype.updateOne = function (obj, fn) {
+CollectionBase.prototype.updateOne = function (filter, updates, options, fn) {
     this.getCollection(function (err, collection) {
         if (err) {
             fn(err);
         }
         else {
-            collection.updateOne(obj, fn);
+            collection.updateOne(filter, updates, options, fn);
         }
     });
 }

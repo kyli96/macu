@@ -4,6 +4,7 @@
 
 apiRoutes = function (){
     var router = express.Router();
+    router.get('/channel/:id/history', apiControllers.getChannelHistory);
     router.get('/channels', apiControllers.getChannels);
     router.post('/channels', apiControllers.createChannel);
     

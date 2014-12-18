@@ -13,6 +13,7 @@ init = function (coreApp, apiApp){
     authStragegies = authStrategies;
 
     coreApp.use(cookieParser());
+    coreApp.use(bodyParser.json());
     coreApp.use(bodyParser.urlencoded({ extended: true }));
     coreApp.use(authentication.expressSession());
     coreApp.use(passport.initialize());
