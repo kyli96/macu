@@ -17,12 +17,7 @@ var Mf = {
             return false;
         });
 
-        Mf.getChannels(function () { // should pre-populate
-            if (M.channels.length > 0) {
-                M.currentCid = M.channels[0]._id;
-                Mf.refreshMsgs();
-            }
-        });
+        React.render(React.createElement(ChannelsCol, null), document.getElementById('body_container'));
     },
     sendMsg: function (t_id, msg) {
         console.log('send msg to ' + t_id);
@@ -41,26 +36,10 @@ var Mf = {
         $.ajax({
             url: '/api/channels'
         }).done(function (data) {
-            Mf.refreshChannels(data, fn);
-        });
-    },
-    refreshChannels: function (channels, fn) {
-        M.channels = channels;
-        var newList = $('<ul id="channels_list">');
-        for (var i = 0; i < channels.length; i++) {
-            newList.append($('<li class="channel">').append($('<a id="' + channels[i]._id + '" class="channel_name">').text('#' + channels[i].name)));
-        }
-        $('#channels_list').replaceWith(newList);
-        $('#channels_list .channel_name').on('click', function () {
-            var id = $(this).attr('id');
-            if (M.currentCid == id) {
-                return;
+            if (data) {
+                fn(data);
             }
-            console.log('switching to channel ' + id);
-            M.currentCid = id;
-            Mf.refreshMsgs();
         });
-        fn();
     },
     refreshMsgs: function () {
         $('#messages').empty();
