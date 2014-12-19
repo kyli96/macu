@@ -9,7 +9,7 @@ frontendRoutes = function (){
     router.use('/css', express.static(path.join(__dirname, '/../../client/css')));
 
     router.get('/', frontendControllers.showSignin);
-    router.use('/messages', express.static(path.join(__dirname, '/../../client/html/messages')));
+    router.get('/messages', frontendControllers.showMessages);
     return router;
 }
 

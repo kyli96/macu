@@ -94,7 +94,7 @@ Channel.prototype.recordMsg = function (msg, fn) {
         return;
     }
     var collection = new CollectionBase(MSG_HISTORY_COLLECTION);
-    collection.updateOne({ t_id: 'C' + this._id }, { $push: { msgs: msg } }, null, fn);
+    collection.updateOne({ t_id: 'C' + this._id }, { $push: { msgs: msg } }, { upsert: true }, fn);
 }
 
 module.exports = {

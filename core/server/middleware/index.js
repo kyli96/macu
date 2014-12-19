@@ -7,6 +7,7 @@
     authStrategies = require('./authStrategies'),
     authentication = require('./authentication'),
     messenger = require('./messenger'),
+    exphbs = require('express-handlebars'),
     init;
 
 init = function (coreApp, apiApp){
@@ -18,6 +19,15 @@ init = function (coreApp, apiApp){
     coreApp.use(authentication.expressSession());
     coreApp.use(passport.initialize());
     coreApp.use(passport.session());
+    
+    var hbs = exphbs.create({
+        defaultLayout: 'main',
+        extname: '.hbs',
+        layoutsDir: 'core/server/views/layouts/'
+    });
+    coreApp.engine('hbs', hbs.engine);
+    coreApp.set('view engine', 'hbs');
+
     coreApp.use('/messages', authentication.authorizeExpress());
     
     apiApp.use(routes.api());

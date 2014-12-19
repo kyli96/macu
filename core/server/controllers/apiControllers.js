@@ -52,7 +52,12 @@ controllers = {
         channel.getHistory(function (err, r) {
             if (err) {
                 console.log(err);
-                res.status(500).send(err);
+                if (err.indexOf('unable to find') === 0) {
+                    res.status(404).send(err);
+                }
+                else {
+                    res.status(500).send(err);
+                }
             }
             else {
                 res.send(r);
