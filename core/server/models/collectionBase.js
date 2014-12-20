@@ -21,6 +21,21 @@ CollectionBase.prototype.getCollection = function (fn) {
     });
 }
 
+CollectionBase.prototype.find = function (filter, modifiers, orders, fn) {
+    this.getCollection(function (error, collection) {
+        if (error) {
+            fn(error);
+        }
+        else {
+            var cursor = collection.find(filter, modifiers);
+            if (orders) {
+                cursor = cursor.sort(orders);
+            }
+            cursor.toArray(fn);
+        }
+    });
+}
+
 CollectionBase.prototype.findAll = function (fn) {
     this.getCollection(function (error, collection) {
         if (error) {

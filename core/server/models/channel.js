@@ -57,12 +57,6 @@ Channel.prototype.save = function (fn) {
                 fn(new Error('Failed creating channel'));
             }
             else {
-                var history_col = new CollectionBase(MSG_HISTORY_COLLECTION);
-                history_col.insertOne({ t_id: 'C' + r.ops[0]._id, msgs: [] }, function (history_err, history_r) {
-                    if (history_err) {
-                        console.log(history_err); // should remove channel?
-                    }
-                });
                 fn(null, r);
             }
         });
@@ -75,13 +69,9 @@ Channel.prototype.getHistory = function (fn) {
         return;
     }
     var collection = new CollectionBase(MSG_HISTORY_COLLECTION);
-    collection.findOne({ t_id: 'C' + this._id }, function (err, r) {
+    collection.find({ t_id: 'C' + this._id }, {}, {ts:1}, function (err, r) {
         if (err) {
             fn(err);
-            return;
-        }
-        if (!r) {
-            fn(new Error('unable to find history for ' + this._id));
             return;
         }
         fn(null, r);
@@ -94,7 +84,14 @@ Channel.prototype.recordMsg = function (msg, fn) {
         return;
     }
     var collection = new CollectionBase(MSG_HISTORY_COLLECTION);
-    collection.updateOne({ t_id: 'C' + this._id }, { $push: { msgs: msg } }, { upsert: true }, fn);
+    var msg_obj = {
+        t_id: 'C'+msg.t_id,
+        username: msg.username,
+        name: msg.name,
+        msg: msg.msg,
+        ts: Date.now()
+    };
+    collection.insertOne(msg_obj, fn);
 }
 
 module.exports = {

@@ -24,6 +24,7 @@ messageControllers = {
         console.log('user disconnected');
     },
     onSendMsg: function (obj) {
+        var socket = this;
         if (!obj.t_id) {
             console.log('Missing t_id. All msgs should have target id.');
             return;
@@ -34,7 +35,7 @@ messageControllers = {
                 console.log('Failed to record message:' + err);
             }
         });
-        io.to(obj.t_id).emit('sendMsg', obj);
+        socket.broadcast.to(obj.t_id).emit('sendMsg', obj);
     },
     init: function (mio) {
         io = mio;

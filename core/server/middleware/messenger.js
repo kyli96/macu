@@ -10,7 +10,7 @@ function onConnection(socket) {
 
 function setHandlers(socket) {
     socket.on('disconnect', messageControllers.onDisconnection);
-    socket.on('sendMsg', messageControllers.onSendMsg);
+    socket.on('sendMsg', messageControllers.onSendMsg.bind(socket));
 }
 
 init = function (ioServer) {

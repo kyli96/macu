@@ -1,6 +1,7 @@
 ﻿var M = {
-    channels: [],
-    currentCid: null
+    currentCid: null,
+    user: null,
+    messageClient: null
 };
 var Mf = {
     init: function () {
@@ -8,29 +9,42 @@ var Mf = {
         Mf.socket.on('profile', function (obj) {
             M.user = obj;
         })
-        Mf.socket.on('sendMsg', Mf.showMessage);
+        Mf.socket.on('sendMsg', Mf.onNewMessage);
 
         $('form').submit(function () {
             var msg = $('#message-input').val();
-            Mf.sendMsg(M.currentCid, msg);
+            Mf.sendMsg(M.messageClient.state.currentCid, msg);
             $('#message-input').val('');
             return false;
         });
 
-        React.render(React.createElement(ChannelsCol, null), document.getElementById('body_container'));
+        var client_props = {
+            // initState: {
+            //     currentCid: M.currentCid,
+            // }
+            getChannels: Mf.getChannels,
+            getMsgs: Mf.getMsgs
+        }
+        M.messageClient = React.render(React.createElement(MessageClient, client_props), $('#client_body')[0]);
     },
     sendMsg: function (t_id, msg) {
         console.log('send msg to ' + t_id);
-        Mf.socket.emit('sendMsg', { t_id: t_id, username: M.user.username, name: M.user.name, msg: msg });
-        return true;
-    },
-    showMessage: function (obj) {
-        if (!M.currentCid) {
+        if (!t_id) {
             return;
         }
-        if (M.currentCid == obj.t_id) {
-            $('#messages').append($('<li>').text(obj.name + ': ' + obj.msg));
+        var msg_obj = {
+            t_id: t_id, 
+            username: M.user.username, 
+            name: M.user.name, 
+            msg: msg, 
+            ts: Date.now() 
         }
+        Mf.socket.emit('sendMsg', msg_obj);
+        M.messageClient.onNewMessage(msg_obj);
+        return true;
+    },
+    onNewMessage: function (obj) {
+        M.messageClient.onNewMessage(obj);
     },
     getChannels: function (fn) {
         $.ajax({
@@ -41,18 +55,11 @@ var Mf = {
             }
         });
     },
-    refreshMsgs: function () {
-        $('#messages').empty();
+    getMsgs: function (t_id, fn) {
         $.ajax({
-            url: '/api/channel/' + M.currentCid + '/history'
+            url: '/api/channel/' + t_id + '/history'
         }).done(function (data) {
-            var msgs = data.msgs;
-            if (!msgs) {
-                return;
-            }
-            for (var i = 0; i < msgs.length; i++) {
-                Mf.showMessage(msgs[i]);
-            }
+            fn(data);
         });
     }
 }
