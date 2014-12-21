@@ -23,7 +23,8 @@ var Mf = {
             //     currentCid: M.currentCid,
             // }
             getChannels: Mf.getChannels,
-            getMsgs: Mf.getMsgs
+            getMsgs: Mf.getMsgs,
+            onRefreshMsgs: Mf.onRefreshMsgs
         }
         M.messageClient = React.render(React.createElement(MessageClient, client_props), $('#client_body')[0]);
     },
@@ -61,6 +62,28 @@ var Mf = {
         }).done(function (data) {
             fn(data);
         });
+    },
+    onRefreshMsgs: function() {
+        Wf.resizeMsgFiller();
     }
 }
 Mf.init();
+
+var Wf = {
+    init: function(){
+        $(window).on('resize', function(){
+            $('#channels_col').height($(window).height());
+            Wf.resizeMsgFiller();
+        }).trigger('resize');
+    },
+    resizeMsgFiller: function() {
+        var f_height = $(window).height() - $('#msgs_div').height() - $('#footer').height();
+        if (f_height > 0) {
+            $('#message_front').height(f_height);
+        }
+        else {
+            $('#message_front').height(0);
+        }
+    }
+}
+Wf.init();

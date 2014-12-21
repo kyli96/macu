@@ -1,6 +1,11 @@
 ﻿var Message = React.createClass( {
     render: function () {
-        return <li><strong>{this.props.msg.name}</strong>: {this.props.msg.msg}</li>;
+        return (
+            <div className="message">
+              <a className="message_sender">{this.props.msg.name}</a>
+              <span className="message_content">{this.props.msg.msg}</span>
+            </div>
+        );
     }
 });
 
@@ -10,7 +15,7 @@ var MessageList = React.createClass({
             return <Message key={message.ts} msg={message} />;
         };
         return (
-            <ul id="messages">{this.props.msgs.map(renderMessage)}</ul>
+            <div id="msgs_div">{this.props.msgs.map(renderMessage)}</div>
         );
     }
 });
