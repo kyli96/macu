@@ -21,6 +21,7 @@ ul, ol {
   float: left; 
   position: relative; 
   font-family: 'Lato',sans-serif;
+  height: 1800px;
 }
 #channels_col ul {
   list-style-type: none;

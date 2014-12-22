@@ -10,6 +10,7 @@ function User(data) {
     this.name = data.name || '';
     this.email = data.email || '';
     this.domain = data.domain || '';
+    this.subscribed = data.subscribed || [];
 }
 
 Users = {
@@ -44,6 +45,23 @@ Users = {
             }
         });
     }
+}
+
+User.prototype.subscribeChannel = function(channel_id, fn) {
+    if (!this._id) {
+        fn(new Error('Cannot find user id'));
+        return;
+    }
+    var id = this._id;
+    if (!ObjectID.prototype.isPrototypeOf(id)) {
+        id = new ObjectID(id);
+    }
+    var cid = channel_id;
+    if (!ObjectID.prototype.isPrototypeOf(cid)) {
+        cid = new ObjectID(cid);
+    }
+    var collection = new CollectionBase(USERS_COLLECTION);
+    collection.updateOne({_id: id}, {$addToSet: {subscribed: cid}}, null, fn);
 }
 
 module.exports = {

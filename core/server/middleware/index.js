@@ -29,6 +29,7 @@ init = function (coreApp, apiApp){
     coreApp.set('view engine', 'hbs');
 
     coreApp.use('/messages', authentication.authorizeExpress());
+    // coreApp.use('/api', authentication.authorizeExpress());
     
     apiApp.use(routes.api());
     

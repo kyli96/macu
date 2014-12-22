@@ -8,12 +8,13 @@ messageControllers = {
         var user = new User(socket.request['user']); //from passport.socketio
         console.log(user.username + ' connected');
         var channels;
-        Channel.Channels.findAll(function (err, data) {
+        Channel.Channels.findByIds(user.subscribed, function (err, data) {
             if (err) {
                 console.log('Unable to get channels for user ' + user.username);
             }
             else {
                 for (var i = 0; i < data.length; i++) {
+                    console.log('joining channel '+data[i]._id);
                     socket.join(data[i]._id);
                 }
             }

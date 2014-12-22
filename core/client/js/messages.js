@@ -8,6 +8,8 @@ var Mf = {
         Mf.socket = io();
         Mf.socket.on('profile', function (obj) {
             M.user = obj;
+            M.messageClient = React.render(React.createElement(MessageClient, client_props), 
+                $('#client_body')[0], Mf.onRefreshChannels);
         })
         Mf.socket.on('sendMsg', Mf.onNewMessage);
 
@@ -26,7 +28,7 @@ var Mf = {
             getMsgs: Mf.getMsgs,
             onRefreshMsgs: Mf.onRefreshMsgs
         }
-        M.messageClient = React.render(React.createElement(MessageClient, client_props), $('#client_body')[0]);
+        //M.messageClient = React.render(React.createElement(MessageClient, client_props), $('#client_body')[0]);
     },
     sendMsg: function (t_id, msg) {
         console.log('send msg to ' + t_id);
@@ -49,7 +51,7 @@ var Mf = {
     },
     getChannels: function (fn) {
         $.ajax({
-            url: '/api/channels'
+            url: '/api/user/'+M.user._id+'/channels'
         }).done(function (data) {
             if (data) {
                 fn(data);
@@ -63,6 +65,9 @@ var Mf = {
             fn(data);
         });
     },
+    onRefreshChannels: function() {
+        Wf.resizeChannelsCol();
+    },
     onRefreshMsgs: function() {
         Wf.resizeMsgFiller();
     }
@@ -72,9 +77,12 @@ Mf.init();
 var Wf = {
     init: function(){
         $(window).on('resize', function(){
-            $('#channels_col').height($(window).height());
+            Wf.resizeChannelsCol();
             Wf.resizeMsgFiller();
         }).trigger('resize');
+    },
+    resizeChannelsCol: function() {
+        $('#channels_col').height($(window).height());
     },
     resizeMsgFiller: function() {
         var f_height = $(window).height() - $('#msgs_div').height() - $('#footer').height();

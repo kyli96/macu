@@ -10,7 +10,11 @@ function Channel(values) {
     this.name = values.name || '';
     this.access = values.access || 'public';
     this.domain = values.domain || '';
-    this.users = values.users || [];
+    this.includeAll = values.includeAll || false;
+    this.owner = values.owner || null;
+    if (ObjectID.prototype.isPrototypeOf(this.owner)) {
+        this.owner = this.owner.toHexString();
+    }
 }
 
 Channels = {
@@ -28,16 +32,37 @@ Channels = {
                 fn(null, channels);
             }
         });
+    },
+    findByIds: function (ids, fn) {
+        for (var i=0;i<ids.length;i++) {
+            if (!ObjectID.prototype.isPrototypeOf(ids[i])) {
+                ids[i] = new ObjectID(ids[i]);
+            }
+        }
+        var collection = new CollectionBase(CHANNELS_COLLECTION);
+        collection.find({_id: {$in: ids}}, {}, null, function (err, data){
+            if (err) {
+                fn(err);
+                return;
+            }
+            fn(null, data);
+        });
     }
 }
 
 Channel.prototype.save = function (fn) {
     var collection = new CollectionBase(CHANNELS_COLLECTION);
+    if (!this.owner || !this.name || !this.access || !this.domain) {
+        fn(new Error('Missing required field(s)'));
+        return;
+    }
     if (this._id) {
         var updateProperties = {
             name: this.name,
             access: this.access,
-            users: this.users
+            domain: this.domain,
+            owner: this.owner,
+            includeAll: this.includeAll
         };
         collection.updateOne({ _id: ObjectID(this._id) }, { $set: updateProterties }, null, fn);
     }
@@ -46,7 +71,8 @@ Channel.prototype.save = function (fn) {
             name: this.name,
             access: this.access,
             domain: this.domain,
-            users: this.users
+            owner: this.owner,
+            includeAll: this.includeAll
         };
         collection.insertOne(newChannel, function (err, r) {
             if (err) {
