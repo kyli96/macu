@@ -5,25 +5,19 @@
 
 controllers = {
     getUser: function (req, res) {
-        Users.findById(req.params.id, function (err, results) {
-            if (err) {
-                console.log(err);
-                res.status(500).send(err);
-            }
-            else {
-                res.send(results);
-            }
+        Users.findById(req.params.id).done(function (results) {
+            res.send(results);
+        }, function (err) {
+            console.log(err);
+            res.status(500).send(err);
         });
     },
     getChannels: function (req, res) {
-        Channel.Channels.findAll(function (err, results) {
-            if (err) {
-                console.log(err);
-                res.status(500).send(err);
-            }
-            else {
-                res.send(results);
-            }
+        Channel.Channels.findAll().done(function (results) {
+            res.send(results);
+        }, function(err) {
+            console.log(err);
+            res.status(500).send(err);
         });
     },
     getUserChannels: function (req, res) {
@@ -33,27 +27,18 @@ controllers = {
         //    res.status(401).send('Unable to get user from request');
         //    return;
         //}
-        Users.findById(req.params.id, function (err, user) {
-            if (err) {
+        Users.findById(req.params.id)
+            .then(function (user) {
+                if (!user.subscribed || user.subscribed.length == 0) {
+                    return [];
+                }
+                return Channel.Channels.findByIds(user.subscribed);
+            }).done(function(data) {
+                res.status(200).send(data);
+            }, function(err) {
                 console.log(err);
                 res.status(500).send(err);
-            }
-            else {
-                if (!user.subscribed || user.subscribed.length == 0) {
-                    res.status(200).send([]);
-                    return;
-                }
-                Channel.Channels.findByIds(user.subscribed, function(err, data) {
-                    if (err) {
-                        console.log(err);
-                        res.status(500).send(err);
-                    }
-                    else {
-                        res.status(200).send(data);
-                    }
-                });
-            }
-        });
+            });
     },
     createChannel: function (req, res) {
         if (!req.body.name) {
@@ -63,21 +48,14 @@ controllers = {
         var channel = new Channel.Channel(req.body);
         // set owner using session instead
         var owner = new User({_id: req.body.owner});
-        channel.save(function (err, r) {
-            if (err) {
-                console.log(err);
-                res.status(500).send(err);
-                return;
-            }
-            console.log(r.insertedCount + ' channel created.'); // assert?
-            owner.subscribeChannel(r._id, function(err, subscribe_r) {
-                if (err) {
-                    console.log('Channel ('+r._id+') created but failed to subscribe owner to channel:'+err);
-                    res.status(500).send('Channel ('+r._id+') created but failed to subscribe owner to channel:'+err);
-                    return;
-                }
-                res.status(201).send(r);
-            });
+        channel.save().then(function (r) {
+            console.log(r.insertedCount + ' channel created.');
+            return owner.subscribeChannel(r._id);
+        }).done(function(r) {
+            res.status(201).send(r);
+        }, function(err) {
+            console.log(err);
+            res.status(500).send(err);
         });
     },
     subscribeChannel: function (req, res) {
@@ -96,13 +74,11 @@ controllers = {
         if (!User.prototype.isPrototypeOf(user)) {
             user = new User(user);
         }
-        user.subscribeChannel(cid, function(err, r) {
-            if (err) {
-                console.log(err);
-                res.status(500).send('Failed to subscribe to channel: '+err);
-                return;
-            }
+        user.subscribeChannel(cid).done(function(r) {
             res.status(201).send(r);
+        }, function(err) {
+            console.log(err);
+            res.status(500).send('Failed to subscribe to channel: '+err);
         });
     },
     getChannelHistory: function (req, res) {
@@ -113,18 +89,15 @@ controllers = {
             return;
         }
         var channel = new Channel.Channel({_id:id});
-        channel.getHistory(function (err, r) {
-            if (err) {
-                console.log(err);
-                if (err.indexOf('unable to find') === 0) {
-                    res.status(404).send(err);
-                }
-                else {
-                    res.status(500).send(err);
-                }
+        channel.getHistory().done(function (r) {
+            res.send(r);
+        }, function(err) {
+            console.log(err);
+            if (err.indexOf('unable to find') === 0) {
+                res.status(404).send(err);
             }
             else {
-                res.send(r);
+                res.status(500).send(err);
             }
         });
     }

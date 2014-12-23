@@ -1,8 +1,8 @@
 ﻿var utils;
 
 utils = {
-    isDevMode: function (app) {
-        return app.get('env') === 'development';
+    isProdMode: function () {
+        return process.env.NODE_ENV === 'production';
     }
 }
 

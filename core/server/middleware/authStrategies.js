@@ -6,10 +6,18 @@ passport.serializeUser(function (user, done) {
     done(null, user._id);
 });
 
-passport.deserializeUser(function (id, done) {
-    Users.findById(id, function (err, user) {
-        done(err, user);
+passport.deserializeUser(function (id, fn) {
+    Users.findById(id).done(function(user) {
+        fn(null, user);
+    }, function(err) {
+        fn(err);
     });
 });
 
-passport.use(new LocalStrategy(Users.findByCredentials));
+passport.use(new LocalStrategy(function(username, password, fn) {
+    Users.findByCredentials(username, password).done(function(user) {
+        fn(null, user);
+    }, function (err){
+        fn(err);
+    })
+}));

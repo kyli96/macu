@@ -14,43 +14,36 @@ function User(data) {
 }
 
 Users = {
-    findById: function (id, fn) {
+    findById: function (id) {
         var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
         if (!hexCheck.test(id)) {
-            fn({ error: 'invalid id' });
+            throw new Error('invalid id');
         }
         else {
             var collection = new CollectionBase(USERS_COLLECTION);
-            collection.findOne({ '_id': ObjectID(id) }, function (err, data) {
-                if (err) {
-                    fn(err);
-                }
-                else {
-                    fn(null, new User(data));
-                }
-            });
+            return collection.findOne({ '_id': ObjectID(id) })
+                .then(function (data) {
+                    return new User(data);
+                });
         }
     },
-    findByCredentials: function (username, password, fn) {
+    findByCredentials: function (username, password) {
         var collection = new CollectionBase(USERS_COLLECTION);
-        collection.findOne({ username: username, password: password }, function (err, data) {
-            if (err) {
-                fn(err);
-            }
-            else if (!data) {
-                fn(new Error('User not found.'));
-            }
-            else {
-                fn(null, new User(data));
-            }
-        });
+        return collection.findOne({ username: username, password: password })
+            .then(function (data) {
+                if (!data) {
+                    throw new Error('User not found');
+                }
+                else {
+                    return new User(data);
+                }
+            });
     }
 }
 
-User.prototype.subscribeChannel = function(channel_id, fn) {
+User.prototype.subscribeChannel = function(channel_id) {
     if (!this._id) {
-        fn(new Error('Cannot find user id'));
-        return;
+        throw new Error('Cannot find user id');
     }
     var id = this._id;
     if (!ObjectID.prototype.isPrototypeOf(id)) {
@@ -61,7 +54,7 @@ User.prototype.subscribeChannel = function(channel_id, fn) {
         cid = new ObjectID(cid);
     }
     var collection = new CollectionBase(USERS_COLLECTION);
-    collection.updateOne({_id: id}, {$addToSet: {subscribed: cid}}, null, fn);
+    return collection.updateOne({_id: id}, {$addToSet: {subscribed: cid}}, null);
 }
 
 module.exports = {

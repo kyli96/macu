@@ -18,43 +18,32 @@ function Channel(values) {
 }
 
 Channels = {
-    findAll: function (fn) {
+    findAll: function () {
         var collection = new CollectionBase(CHANNELS_COLLECTION);
-        collection.findAll(function (err, r) {
-            if (err) {
-                fn(err);
-            }
-            else {
+        return collection.findAll()
+            .then(function (r) {
                 var channels = [];
                 for (var i = 0; i < r.length; i++) {
                     channels[i] = new Channel(r[i]);
                 }
-                fn(null, channels);
-            }
-        });
+                return channels;
+            });
     },
-    findByIds: function (ids, fn) {
+    findByIds: function (ids) {
         for (var i=0;i<ids.length;i++) {
             if (!ObjectID.prototype.isPrototypeOf(ids[i])) {
                 ids[i] = new ObjectID(ids[i]);
             }
         }
         var collection = new CollectionBase(CHANNELS_COLLECTION);
-        collection.find({_id: {$in: ids}}, {}, null, function (err, data){
-            if (err) {
-                fn(err);
-                return;
-            }
-            fn(null, data);
-        });
+        return collection.find({_id: {$in: ids}}, {}, null);
     }
 }
 
-Channel.prototype.save = function (fn) {
+Channel.prototype.save = function () {
     var collection = new CollectionBase(CHANNELS_COLLECTION);
     if (!this.owner || !this.name || !this.access || !this.domain) {
-        fn(new Error('Missing required field(s)'));
-        return;
+        throw new Error('Missing required field(s)');
     }
     if (this._id) {
         var updateProperties = {
@@ -64,7 +53,7 @@ Channel.prototype.save = function (fn) {
             owner: this.owner,
             includeAll: this.includeAll
         };
-        collection.updateOne({ _id: ObjectID(this._id) }, { $set: updateProterties }, null, fn);
+        return collection.updateOne({ _id: ObjectID(this._id) }, { $set: updateProterties }, null);
     }
     else {
         var newChannel = {
@@ -74,40 +63,28 @@ Channel.prototype.save = function (fn) {
             owner: this.owner,
             includeAll: this.includeAll
         };
-        collection.insertOne(newChannel, function (err, r) {
-            if (err) {
-                fn(err);
-            }
-            else if (r.result.ok != 1 || r.insertedCount != 1 || !r.ops || !r.ops[0] || !r.ops[0]._id) {
-                console.log('Failed creating channel:' + r);
-                fn(new Error('Failed creating channel'));
-            }
-            else {
-                fn(null, r);
-            }
-        });
+        return collection.insertOne(newChannel)
+            .then(function (r) {
+                if (r.result.ok != 1 || r.insertedCount != 1 || !r.ops || !r.ops[0] || !r.ops[0]._id) {
+                    console.log('Failed creating channel:' + r);
+                    throw new Error('Failed creating channel');
+                }
+                return r;
+            });
     }
 }
 
-Channel.prototype.getHistory = function (fn) {
+Channel.prototype.getHistory = function () {
     if (!this._id) {
-        fn(new Error('channel is not created yet.'));
-        return;
+        throw new Error('channel is not created yet.');
     }
     var collection = new CollectionBase(MSG_HISTORY_COLLECTION);
-    collection.find({ t_id: 'C' + this._id }, {}, {ts:1}, function (err, r) {
-        if (err) {
-            fn(err);
-            return;
-        }
-        fn(null, r);
-    });
+    return collection.find({ t_id: 'C' + this._id }, {}, {ts:1});
 }
 
-Channel.prototype.recordMsg = function (msg, fn) {
+Channel.prototype.recordMsg = function (msg) {
     if (!this._id) {
-        fn(new Error('channel is not created yet.'));
-        return;
+        throw new Error('channel is not created yet.');
     }
     var collection = new CollectionBase(MSG_HISTORY_COLLECTION);
     var msg_obj = {
@@ -117,7 +94,7 @@ Channel.prototype.recordMsg = function (msg, fn) {
         msg: msg.msg,
         ts: Date.now()
     };
-    collection.insertOne(msg_obj, fn);
+    return collection.insertOne(msg_obj);
 }
 
 module.exports = {

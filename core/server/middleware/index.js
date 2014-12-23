@@ -27,13 +27,13 @@ init = function (coreApp, apiApp){
         layoutsDir: 'core/server/views/layouts/',
         helpers: {
             ifInDevMode: function (options) {
-                if (utils.isDevMode(coreApp)) {
+                if (!utils.isProdMode()) {
                     return options.fn(this);
                 }
                 return '';
             },
             ifInProdMode: function (options) {
-                if (!utils.isDevMode(coreApp)) {
+                if (utils.isProdMode(coreApp)) {
                     return options.fn(this);
                 }
                 return '';
