@@ -8,6 +8,7 @@
     authentication = require('./authentication'),
     messenger = require('./messenger'),
     exphbs = require('express-handlebars'),
+    utils = require('../utils'),
     init;
 
 init = function (coreApp, apiApp){
@@ -23,7 +24,21 @@ init = function (coreApp, apiApp){
     var hbs = exphbs.create({
         defaultLayout: 'main',
         extname: '.hbs',
-        layoutsDir: 'core/server/views/layouts/'
+        layoutsDir: 'core/server/views/layouts/',
+        helpers: {
+            ifInDevMode: function (options) {
+                if (utils.isDevMode(coreApp)) {
+                    return options.fn(this);
+                }
+                return '';
+            },
+            ifInProdMode: function (options) {
+                if (!utils.isDevMode(coreApp)) {
+                    return options.fn(this);
+                }
+                return '';
+            }
+        }
     });
     coreApp.engine('hbs', hbs.engine);
     coreApp.set('view engine', 'hbs');

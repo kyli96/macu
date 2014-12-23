@@ -8,8 +8,6 @@ var Mf = {
         Mf.socket = io();
         Mf.socket.on('profile', function (obj) {
             M.user = obj;
-            M.messageClient = React.render(React.createElement(MessageClient, client_props), 
-                $('#client_body')[0], Mf.onRefreshChannels);
         })
         Mf.socket.on('sendMsg', Mf.onNewMessage);
 
@@ -19,7 +17,8 @@ var Mf = {
             $('#message-input').val('');
             return false;
         });
-
+    },
+    renderMessageClient: function () {
         var client_props = {
             // initState: {
             //     currentCid: M.currentCid,
@@ -27,8 +26,9 @@ var Mf = {
             getChannels: Mf.getChannels,
             getMsgs: Mf.getMsgs,
             onRefreshMsgs: Mf.onRefreshMsgs
-        }
-        //M.messageClient = React.render(React.createElement(MessageClient, client_props), $('#client_body')[0]);
+        };
+        M.messageClient = React.render(React.createElement(MessageClient, client_props), 
+            $('#client_body')[0], Mf.onRefreshChannels);
     },
     sendMsg: function (t_id, msg) {
         console.log('send msg to ' + t_id);
@@ -72,7 +72,6 @@ var Mf = {
         Wf.resizeMsgFiller();
     }
 }
-Mf.init();
 
 var Wf = {
     init: function(){
@@ -94,4 +93,3 @@ var Wf = {
         }
     }
 }
-Wf.init();

@@ -11,12 +11,22 @@
   <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
   <script src="http://fb.me/react-0.12.2.js"></script>
 
-  <!-- only for dev mode -->
-  <!-- In-browser JSX transformer, remove when pre-compiling JSX. -->
+  {{#ifInDevMode}}
   <script src="/js/build/channels.js"></script>
   <script src="/js/build/messages.js"></script>
   <script src="/js/build/messageclient.js"></script>
-
   <script src="/js/messages.js"></script>
+  {{/ifInDevMode}}
+
+  <script type="text/javascript">
+    if (!M.user) {
+      M.user = {
+        _id: "{{user._id}}"
+      };
+    }
+    Mf.renderMessageClient();
+    Mf.init();
+    Wf.init();
+  </script>
 </body>
 </html>
