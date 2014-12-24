@@ -38,6 +38,10 @@ Channels = {
         }
         var collection = new CollectionBase(CHANNELS_COLLECTION);
         return collection.find({_id: {$in: ids}}, {}, null);
+    },
+    findByDomain: function (domain) {
+        var collection = new CollectionBase(CHANNELS_COLLECTION);
+        return collection.find({domain:domain, access:'public'}, {}, null);
     }
 }
 
@@ -72,8 +76,9 @@ Channel.prototype.save = function () {
                     console.log('Failed creating channel:' + r);
                     throw new Error('Failed creating channel');
                 }
+                this._id = r.ops[0]._id;
                 return r;
-            });
+            }.bind(this));
     }
 }
 

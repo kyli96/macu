@@ -3,6 +3,24 @@
     user: null,
     messageClient: null
 };
+var API = {
+    get: function(url, fn) {
+        $.ajax({
+            url: '/api' + url
+        }).done(function (data) {
+            fn(data);
+        });
+    },
+    post: function(url, data, fn) {
+        $.ajax({
+            type: 'POST',
+            url: '/api' + url,
+            data: data
+        }).done(function(r) {
+            fn(r);
+        });
+    }
+};
 var Mf = {
     init: function () {
         Mf.socket = io();
@@ -10,6 +28,7 @@ var Mf = {
             M.user = obj;
         })
         Mf.socket.on('sendMsg', Mf.onNewMessage);
+        Mf.socket.on('newChannel', Mf.onNewChannel);
         
         $('form').submit(function () {
             var msg = $('#message-input').val();
@@ -26,10 +45,11 @@ var Mf = {
             getChannels: Mf.getChannels,
             getMsgs: Mf.getMsgs,
             onRefreshMsgs: Mf.onRefreshMsgs,
-            onClickCreateChannel: Mf.onClickCreateChannel
+            onClickCreateChannel: Mf.onClickCreateChannel,
+            onRefreshChannels: Mf.onRefreshChannels
         };
         M.messageClient = React.render(React.createElement(MessageClient, client_props), 
-            $('#client_body')[0], Mf.onRefreshChannels);
+            $('#client_body')[0]);
     },
     sendMsg: function (t_id, msg) {
         console.log('send msg to ' + t_id);
@@ -50,6 +70,9 @@ var Mf = {
     onNewMessage: function (obj) {
         M.messageClient.onNewMessage(obj);
     },
+    onNewChannel: function (channel) {
+        M.messageClient.onNewChannel(channel);
+    },
     onClickCreateChannel: function () {
         if ($('#create_channel_modal').length === 0) {
             $(document.body).append($('<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">')
@@ -69,28 +92,17 @@ var Mf = {
         channel.access = "public";
         channel.domain = M.user.domain;
         channel.owner = M.user._id;
-        $.post('/api/channels', channel).done(function(data) {
-            console.log(data);
+        API.post('/channels', channel, function(data){
         });
         if ($('#create_channel_modal').length) {
             $('#create_channel_modal').modal('hide');
         }
     },
     getChannels: function (fn) {
-        $.ajax({
-            url: '/api/user/'+M.user._id+'/channels'
-        }).done(function (data) {
-            if (data) {
-                fn(data);
-            }
-        });
+        API.get('/user/'+M.user._id+'/channels', fn);
     },
     getMsgs: function (t_id, fn) {
-        $.ajax({
-            url: '/api/channel/' + t_id + '/history'
-        }).done(function (data) {
-            fn(data);
-        });
+        API.get('/channel/'+t_id+'/history', fn);
     },
     onRefreshChannels: function() {
         Wf.resizeChannelsCol();

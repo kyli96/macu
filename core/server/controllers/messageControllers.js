@@ -38,6 +38,9 @@ messageControllers = {
         });
         socket.broadcast.to(obj.t_id).emit('sendMsg', obj);
     },
+    onNewChannel: function (channel) {
+        io.emit('newChannel', channel);
+    },
     init: function (mio) {
         io = mio;
     }

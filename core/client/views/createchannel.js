@@ -23,8 +23,17 @@ var CreateChannel = React.createClass({
         		  <h4 className="modal-title">Create Channel</h4>
       			</div>
       			<div className="modal-body">
-        		  Name: <input type="text" name="channel_name" value={this.state.name} onChange={this._onNameChange} />
-        		  Description: <textarea name="channel_name" value={this.state.description} onChange={this._onDescriptionChange} />
+      			  <p className="top_margin">
+        		  <label htmlFor="channel_name" className="inline-block">Name</label> 
+        		  <input className="title_input" type="text" id="channel_name" value={this.state.name} onChange={this._onNameChange} />
+        		  </p>
+        		  <p>
+        		  <label htmlFor="channel_desc" className="inline-block">
+        		  Description<br/>
+        		  <span className="normal">(optional)</span>
+        		  </label>
+        		  <textarea maxLength="250" id="channel_desc" value={this.state.description} onChange={this._onDescriptionChange} />
+      			  </p>
       			</div>
       			<div className="modal-footer">
         		  <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>

@@ -27,7 +27,7 @@
               <h2 id="channels_header" className="hoverable">Channels</h2>
               <ul id="channels_list">
                 {this.props.channels.map(createItem)}
-                <a className="create_channel" onClick={this._onClickCreateChannel}>Create Channel</a>
+                <a className="create_channel list_more" onClick={this._onClickCreateChannel}>Create Channel</a>
               </ul>
             </div>
         );

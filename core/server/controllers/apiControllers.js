@@ -1,6 +1,8 @@
 ﻿var Channel = require('../models/channel'),
     Users = require('../models/user').Users,
     User = require('../models/user').User,
+    Promise = require('bluebird'),
+    MessageController = require('./messageControllers'),
     controllers;
 
 controllers = {
@@ -13,7 +15,8 @@ controllers = {
         });
     },
     getChannels: function (req, res) {
-        Channel.Channels.findAll().done(function (results) {
+        var domain = req.params.domain;
+        Channel.Channels.findByDomain(domain).done(function (results) {
             res.send(results);
         }, function(err) {
             console.log(err);
@@ -27,14 +30,29 @@ controllers = {
         //    res.status(401).send('Unable to get user from request');
         //    return;
         //}
+        var user_channels = [];
+        var user_channel_ids = [];
+        var user;
         Users.findById(req.params.id)
-            .then(function (user) {
+            .then(function (data) {
+                user = data;
                 if (!user.subscribed || user.subscribed.length == 0) {
-                    return [];
+                    return new Promise(function(resolve) {resolve([]);});
                 }
                 return Channel.Channels.findByIds(user.subscribed);
+            }).then(function(data) {
+                user_channels = data;
+                for(var i=0; i<data.length; i++) {
+                    user_channel_ids.push(''+data[i]._id);
+                }
+                return Channel.Channels.findByDomain(user.domain);
             }).done(function(data) {
-                res.status(200).send(data);
+                for (var i=0; i<data.length; i++) {
+                    if (user_channel_ids.indexOf(''+data[i]._id) === -1) {
+                        user_channels.push(data[i]);
+                    }
+                }
+                res.status(200).send(user_channels);
             }, function(err) {
                 console.log(err);
                 res.status(500).send(err);
@@ -52,6 +70,7 @@ controllers = {
             console.log(r.insertedCount + ' channel created.');
             return owner.subscribeChannel(r._id);
         }).done(function(r) {
+            MessageController.onNewChannel(channel);
             res.status(201).send(r);
         }, function(err) {
             console.log(err);
