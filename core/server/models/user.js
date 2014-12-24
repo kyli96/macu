@@ -1,5 +1,6 @@
 ﻿var CollectionBase = require('./collectionBase'),
     ObjectID = require('mongodb').ObjectID,
+    Channels = require('./channel').Channels,
     Users;
 
 var USERS_COLLECTION = 'users';
@@ -55,6 +56,30 @@ User.prototype.subscribeChannel = function(channel_id) {
     }
     var collection = new CollectionBase(USERS_COLLECTION);
     return collection.updateOne({_id: id}, {$addToSet: {subscribed: cid}}, null);
+}
+
+User.prototype.getChannels = function () {
+    if (!this.subscribed || this.subscribed.length == 0) {
+        return new Promise(function(resolve) {resolve([]);});
+    }
+    return Channels.findByIds(this.subscribed);
+}
+
+Users = {
+    subscribeChannelForDomain: function (domain, channel_id) {
+        if (!domain) {
+            throw new Error('Missing domain');
+        }
+        if (!channel_id) {
+            throw new Error('Missing channel_id');
+        }
+        var cid = channel_id;
+        if (!ObjectID.prototype.isPrototypeOf(cid)) {
+            cid = new ObjectID(cid);
+        }
+        var collection = new CollectionBase(USERS_COLLECTION);
+        return collection.updateOne({domain: domain}, {$addToSet: {subscribed: cid}}, null);
+    }
 }
 
 module.exports = {

@@ -52,7 +52,6 @@ var Mf = {
             $('#client_body')[0]);
     },
     sendMsg: function (t_id, msg) {
-        console.log('send msg to ' + t_id);
         if (!t_id) {
             return;
         }
@@ -71,7 +70,9 @@ var Mf = {
         M.messageClient.onNewMessage(obj);
     },
     onNewChannel: function (channel) {
-        M.messageClient.onNewChannel(channel);
+        if (channel.domain == M.user.domain) {
+            M.messageClient.onNewChannel(channel);
+        }
     },
     onClickCreateChannel: function () {
         if ($('#create_channel_modal').length === 0) {

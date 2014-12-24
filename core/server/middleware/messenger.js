@@ -1,15 +1,17 @@
 ﻿var authentication = require('./authentication'),
     messageControllers = require('../controllers/messageControllers'),
+    User = require('../models/user').User,
     io,
     init;
 
 function onConnection(socket) {
-    messageControllers.onConnection(socket);
-    setHandlers(socket);
+    var user = new User(socket.request['user']); //from passport.socketio
+    messageControllers.onConnection(socket, user);
+    setHandlers(socket, user);
 }
 
-function setHandlers(socket) {
-    socket.on('disconnect', messageControllers.onDisconnection);
+function setHandlers(socket, user) {
+    socket.on('disconnect', function () { messageControllers.onDisconnection(user); });
     socket.on('sendMsg', messageControllers.onSendMsg.bind(socket));
 }
 

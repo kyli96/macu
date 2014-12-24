@@ -38,7 +38,7 @@ Channels = {
             }
         }
         var collection = new CollectionBase(CHANNELS_COLLECTION);
-        return collection.find({_id: {$in: ids}}, {}, null);
+        return collection.find({ _id: { $in: ids } }, {}, null);
     },
     findByDomain: function (domain) {
         var collection = new CollectionBase(CHANNELS_COLLECTION);
