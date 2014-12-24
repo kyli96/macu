@@ -10,7 +10,7 @@ var Mf = {
             M.user = obj;
         })
         Mf.socket.on('sendMsg', Mf.onNewMessage);
-
+        
         $('form').submit(function () {
             var msg = $('#message-input').val();
             Mf.sendMsg(M.messageClient.state.currentCid, msg);
@@ -25,7 +25,8 @@ var Mf = {
             // }
             getChannels: Mf.getChannels,
             getMsgs: Mf.getMsgs,
-            onRefreshMsgs: Mf.onRefreshMsgs
+            onRefreshMsgs: Mf.onRefreshMsgs,
+            onClickCreateChannel: Mf.onClickCreateChannel
         };
         M.messageClient = React.render(React.createElement(MessageClient, client_props), 
             $('#client_body')[0], Mf.onRefreshChannels);
@@ -40,7 +41,7 @@ var Mf = {
             username: M.user.username, 
             name: M.user.name, 
             msg: msg, 
-            ts: Date.now() 
+            ts: Date.now()
         }
         Mf.socket.emit('sendMsg', msg_obj);
         M.messageClient.onNewMessage(msg_obj);
@@ -48,6 +49,32 @@ var Mf = {
     },
     onNewMessage: function (obj) {
         M.messageClient.onNewMessage(obj);
+    },
+    onClickCreateChannel: function () {
+        if ($('#create_channel_modal').length === 0) {
+            $(document.body).append($('<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">')
+                .attr('id', 'create_channel_modal'));
+            var props = {
+                onClickSave: Mf.createChannel
+            };
+            React.render(React.createElement(CreateChannel, props), $('#create_channel_modal')[0], function () {
+                $('#create_channel_modal').modal();
+            });
+        }
+        else {
+            $('#create_channel_modal').modal();
+        }
+    },
+    createChannel: function (channel) {
+        channel.access = "public";
+        channel.domain = M.user.domain;
+        channel.owner = M.user._id;
+        $.post('/api/channels', channel).done(function(data) {
+            console.log(data);
+        });
+        if ($('#create_channel_modal').length) {
+            $('#create_channel_modal').modal('hide');
+        }
     },
     getChannels: function (fn) {
         $.ajax({

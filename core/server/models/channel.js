@@ -9,6 +9,7 @@ function Channel(values) {
     this._id = values._id || null;
     this.name = values.name || '';
     this.access = values.access || 'public';
+    this.description = values.description || '';
     this.domain = values.domain || '';
     this.includeAll = values.includeAll || false;
     this.owner = values.owner || null;
@@ -50,6 +51,7 @@ Channel.prototype.save = function () {
             name: this.name,
             access: this.access,
             domain: this.domain,
+            description: this.description,
             owner: this.owner,
             includeAll: this.includeAll
         };
@@ -60,6 +62,7 @@ Channel.prototype.save = function () {
             name: this.name,
             access: this.access,
             domain: this.domain,
+            description: this.description,
             owner: this.owner,
             includeAll: this.includeAll
         };

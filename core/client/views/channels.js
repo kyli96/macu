@@ -9,6 +9,11 @@
         }
         this.props.onCurrentCidChange(new_cid);
     },
+    _onClickCreateChannel: function() {
+        if (this.props.onClickCreateChannel) {
+            this.props.onClickCreateChannel();
+        }
+    },
     render: function () {
         var createItem = function (channel, i) {
             return (
@@ -20,7 +25,10 @@
         return (
             <div id="channels" className="section_holder">
               <h2 id="channels_header" className="hoverable">Channels</h2>
-              <ul id="channels_list">{this.props.channels.map(createItem)}</ul>
+              <ul id="channels_list">
+                {this.props.channels.map(createItem)}
+                <a className="create_channel" onClick={this._onClickCreateChannel}>Create Channel</a>
+              </ul>
             </div>
         );
     }

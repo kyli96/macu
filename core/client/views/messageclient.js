@@ -42,6 +42,7 @@
                     channels={this.state.channels} 
                     currentCid={this.state.currentCid}
                     onCurrentCidChange={this.onCurrentCidChange}
+                    onClickCreateChannel={this.props.onClickCreateChannel}
                 />
               </div>
               <div id="messages_container">
