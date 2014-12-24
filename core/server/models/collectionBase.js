@@ -66,7 +66,16 @@ CollectionBase.prototype.findOne = function (filter) {
 CollectionBase.prototype.insertOne = function (obj) {
     return this.getCollection()
         .then(function (collection) {
-            return collection.insertOneAsync(obj);
+            var doc = {};
+            if (obj._dbfields && obj._dbfields.length) {
+                for (var i=0; i<obj._dbfields.length; i++) {
+                    doc[obj._dbfields[i]] = obj[obj._dbfields[i]];
+                }
+            }
+            else {
+                doc = obj;
+            }
+            return collection.insertOneAsync(doc);
         });
 }
 

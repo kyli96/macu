@@ -11,34 +11,34 @@ function User(data) {
     this.email = data.email || '';
     this.domain = data.domain || '';
     this.subscribed = data.subscribed || [];
+    this._dbfields = ['username', 'name', 'email', 'domain', 'subscribed'];
 }
 
-Users = {
-    findById: function (id) {
-        var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
-        if (!hexCheck.test(id)) {
-            throw new Error('invalid id');
-        }
-        else {
-            var collection = new CollectionBase(USERS_COLLECTION);
-            return collection.findOne({ '_id': ObjectID(id) })
-                .then(function (data) {
-                    return new User(data);
-                });
-        }
-    },
-    findByCredentials: function (username, password) {
+User.findById = function (id) {
+    var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
+    if (!hexCheck.test(id)) {
+        throw new Error('invalid id');
+    }
+    else {
         var collection = new CollectionBase(USERS_COLLECTION);
-        return collection.findOne({ username: username, password: password })
+        return collection.findOne({ '_id': ObjectID(id) })
             .then(function (data) {
-                if (!data) {
-                    throw new Error('User not found');
-                }
-                else {
-                    return new User(data);
-                }
+                return new User(data);
             });
     }
+}
+
+User.findByCredentials = function (username, password) {
+    var collection = new CollectionBase(USERS_COLLECTION);
+    return collection.findOne({ username: username, password: password })
+        .then(function (data) {
+            if (!data) {
+                throw new Error('User not found');
+            }
+            else {
+                return new User(data);
+            }
+        });
 }
 
 User.prototype.subscribeChannel = function(channel_id) {

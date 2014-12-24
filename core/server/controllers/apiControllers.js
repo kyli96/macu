@@ -1,5 +1,4 @@
 ﻿var Channel = require('../models/channel'),
-    Users = require('../models/user').Users,
     User = require('../models/user').User,
     Promise = require('bluebird'),
     MessageController = require('./messageControllers'),
@@ -7,7 +6,7 @@
 
 controllers = {
     getUser: function (req, res) {
-        Users.findById(req.params.id).done(function (results) {
+        User.findById(req.params.id).done(function (results) {
             res.send(results);
         }, function (err) {
             console.log(err);
@@ -33,7 +32,7 @@ controllers = {
         var user_channels = [];
         var user_channel_ids = [];
         var user;
-        Users.findById(req.params.id)
+        User.findById(req.params.id)
             .then(function (data) {
                 user = data;
                 if (!user.subscribed || user.subscribed.length == 0) {

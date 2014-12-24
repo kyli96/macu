@@ -1,9 +1,9 @@
 ﻿var CollectionBase = require('./collectionBase'),
+    Message = require('./message'),
     ObjectID = require('mongodb').ObjectID,
     Channels;
 
 var CHANNELS_COLLECTION = 'channels';
-var MSG_HISTORY_COLLECTION = 'msg_history';
 
 function Channel(values) {
     this._id = values._id || null;
@@ -16,6 +16,7 @@ function Channel(values) {
     if (ObjectID.prototype.isPrototypeOf(this.owner)) {
         this.owner = this.owner.toHexString();
     }
+    this._dbfields = ['name', 'access', 'description', 'domain', 'includeAll', 'owner'];
 }
 
 Channels = {
@@ -62,15 +63,7 @@ Channel.prototype.save = function () {
         return collection.updateOne({ _id: ObjectID(this._id) }, { $set: updateProterties }, null);
     }
     else {
-        var newChannel = {
-            name: this.name,
-            access: this.access,
-            domain: this.domain,
-            description: this.description,
-            owner: this.owner,
-            includeAll: this.includeAll
-        };
-        return collection.insertOne(newChannel)
+        return collection.insertOne(this)
             .then(function (r) {
                 if (r.result.ok != 1 || r.insertedCount != 1 || !r.ops || !r.ops[0] || !r.ops[0]._id) {
                     console.log('Failed creating channel:' + r);
@@ -86,23 +79,21 @@ Channel.prototype.getHistory = function () {
     if (!this._id) {
         throw new Error('channel is not created yet.');
     }
-    var collection = new CollectionBase(MSG_HISTORY_COLLECTION);
-    return collection.find({ t_id: 'C' + this._id }, {}, {ts:1});
+    return Message.findByChannel(this._id);
 }
 
 Channel.prototype.recordMsg = function (msg) {
     if (!this._id) {
         throw new Error('channel is not created yet.');
     }
-    var collection = new CollectionBase(MSG_HISTORY_COLLECTION);
-    var msg_obj = {
-        t_id: 'C'+msg.t_id,
+    var values = {
+        t_id: 'C'+this._id,
         username: msg.username,
         name: msg.name,
-        msg: msg.msg,
-        ts: Date.now()
+        msg: msg.msg
     };
-    return collection.insertOne(msg_obj);
+    var message = new Message(values);
+    return message.save();
 }
 
 module.exports = {

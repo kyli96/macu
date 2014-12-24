@@ -1,13 +1,13 @@
 ﻿var passport = require('passport'),
     LocalStrategy = require('passport-local').Strategy,
-    Users = require('../models/user').Users;
+    User = require('../models/user').User;
 
 passport.serializeUser(function (user, done) {
     done(null, user._id);
 });
 
 passport.deserializeUser(function (id, fn) {
-    Users.findById(id).done(function(user) {
+    User.findById(id).done(function(user) {
         fn(null, user);
     }, function(err) {
         fn(err);
@@ -15,7 +15,7 @@ passport.deserializeUser(function (id, fn) {
 });
 
 passport.use(new LocalStrategy(function(username, password, fn) {
-    Users.findByCredentials(username, password).done(function(user) {
+    User.findByCredentials(username, password).done(function(user) {
         fn(null, user);
     }, function (err){
         fn(err);
