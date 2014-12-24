@@ -9,6 +9,7 @@
     messenger = require('./messenger'),
     exphbs = require('express-handlebars'),
     utils = require('../utils'),
+    flash = require('connect-flash'),
     init;
 
 init = function (coreApp, apiApp){
@@ -20,6 +21,7 @@ init = function (coreApp, apiApp){
     coreApp.use(authentication.expressSession());
     coreApp.use(passport.initialize());
     coreApp.use(passport.session());
+    coreApp.use(flash());
     
     var hbs = exphbs.create({
         defaultLayout: 'main',
@@ -51,7 +53,7 @@ init = function (coreApp, apiApp){
     coreApp.use('/api', apiApp);
 
     coreApp.post('/login', 
-        passport.authenticate('local', { failureRedirect: '/' }),
+        passport.authenticate('domain', { failureRedirect: '/', failureFlash: true }),
         function (req, res) {
             console.log('logging in ' + req.body.username);
         	res.redirect('/messages');

@@ -29,12 +29,12 @@ User.findById = function (id) {
     }
 }
 
-User.findByCredentials = function (username, password) {
+User.findByCredentials = function (domain, username, password) {
     var collection = new CollectionBase(USERS_COLLECTION);
-    return collection.findOne({ username: username, password: password })
+    return collection.findOne({ domain: domain, username: username, password: password })
         .then(function (data) {
             if (!data) {
-                throw new Error('User not found');
+                return null;
             }
             else {
                 return new User(data);

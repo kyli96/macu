@@ -3,7 +3,7 @@
 
 controllers = {
     showSignin: function (req, res) {
-        res.sendFile(path.join(__dirname, '/../../client/html/index.html'));
+        res.render(path.join(__dirname, '/../views/login'), { layout: 'outside', user: req.user, message: req.flash('error') });
     },
     showMessages: function (req, res) {
         var context = {
