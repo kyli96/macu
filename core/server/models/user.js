@@ -78,7 +78,7 @@ Users = {
             cid = new ObjectID(cid);
         }
         var collection = new CollectionBase(USERS_COLLECTION);
-        return collection.updateOne({domain: domain}, {$addToSet: {subscribed: cid}}, null);
+        return collection.updateMany({domain: domain}, {$addToSet: {subscribed: cid}}, null);
     }
 }
 

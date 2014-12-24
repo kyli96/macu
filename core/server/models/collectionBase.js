@@ -86,4 +86,11 @@ CollectionBase.prototype.updateOne = function (filter, updates, options) {
         });
 }
 
+CollectionBase.prototype.updateMany = function (filter, updates, options) {
+    return this.getCollection()
+        .then(function (collection) {
+            return collection.updateManyAsync(filter, updates, options);
+        });
+}
+
 module.exports = CollectionBase;
