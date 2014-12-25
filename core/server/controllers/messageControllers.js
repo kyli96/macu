@@ -11,17 +11,13 @@ messageControllers = {
             connected_users['' + user.domain] = { users: {} };
         }
         connected_users['' + user.domain].users["" + user._id] = { socket: socket };
-        var channels;
-        Channel.Channels.findByIds(user.subscribed, function (err, data) {
-            if (err) {
-                console.log('Unable to get channels for user ' + user.username);
+        user.getChannels().done(function (data) {
+            for (var i = 0; i < data.length; i++) {
+                console.log('joining channel '+data[i]._id);
+                socket.join(data[i]._id);
             }
-            else {
-                for (var i = 0; i < data.length; i++) {
-                    console.log('joining channel '+data[i]._id);
-                    socket.join(data[i]._id);
-                }
-            }
+        }, function (err) { 
+            console.log('Unable to get channels for user ' + user.username);
         });
         socket.emit('profile', user);
     },

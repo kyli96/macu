@@ -67,6 +67,7 @@ var Mf = {
         return true;
     },
     onNewMessage: function (obj) {
+        console.log('got new message');
         M.messageClient.onNewMessage(obj);
     },
     onNewChannel: function (channel) {
@@ -117,19 +118,38 @@ var Wf = {
     init: function(){
         $(window).on('resize', function(){
             Wf.resizeChannelsCol();
+            Wf.resizeMessageScrollDiv();
             Wf.resizeMsgFiller();
         }).trigger('resize');
     },
     resizeChannelsCol: function() {
         $('#channels_col').height($(window).height());
     },
-    resizeMsgFiller: function() {
-        var f_height = $(window).height() - $('#msgs_div').height() - $('#footer').height();
-        if (f_height > 0) {
-            $('#message_front').height(f_height);
+    resizeMessageScrollDiv: function () {
+        var scroll_div = $('#messages_scroll_div');
+        var msgs_div = $('#msgs_div');
+        var msgs_height = $('#message_front').height() + msgs_div.height() + parseInt(msgs_div.css('padding-bottom'));
+        if (scroll_div.height() >= msgs_height || scroll_div.scrollTop() >= msgs_height - scroll_div.height()) {
+            Wf.stickBottom = true;
         }
         else {
-            $('#message_front').height(0);
+            Wf.stickBottom = false;
+        }
+        $('#messages_scroll_div').height($(window).height() - $('#footer').height());
+    },
+    resizeMsgFiller: function () {
+        var msgs_div = $('#msgs_div');
+        var msgs_height = $('#message_front').height() + msgs_div.height() + parseInt(msgs_div.css('padding-bottom'));
+        var scroll_div_height = $('#messages_scroll_div').height();
+        var filler = scroll_div_height - msgs_height;
+        if (filler > 0) {
+            $('#message_filler').height(filler);
+        }
+        else {
+            $('#message_filler').height(0);
+            if (Wf.stickBottom) {
+                $('#messages_scroll_div').scrollTop(msgs_height - scroll_div_height);
+            }
         }
     }
 }

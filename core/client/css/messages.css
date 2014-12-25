@@ -88,6 +88,10 @@ textarea{width:460px;height:120px;padding:.5rem;font-size:15px;line-height:1.2re
 #messages_container {
   margin-left: 220px;
 }
+#messages_scroll_div {
+  overflow-y: auto;
+  outline: 0;
+}
 .message {
   position: relative;
   word-wrap: break-word;

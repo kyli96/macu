@@ -72,8 +72,11 @@
                 />
               </div>
               <div id="messages_container">
-                <div id="message_front"></div>
-                <MessageList msgs={this.state.msgs} />
+                <div id="messages_scroll_div">
+                  <div id="message_filler"></div>
+                  <div id="message_front"></div>
+                  <MessageList msgs={this.state.msgs} />
+                </div>
               </div>
             </div>
         );
