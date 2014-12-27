@@ -63,6 +63,10 @@ textarea{width:460px;height:120px;padding:.5rem;font-size:15px;line-height:1.2re
 #client-ui .scroll_bar{width:8px;background:#f0f0f0;-moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px}
 #client-ui .scroll_handle{width:14px}
 #client-ui .scroll_handle_inner{border:3px solid white;background:#d9d9de;-moz-border-radius:6px;-webkit-border-radius:6px;-khtml-border-radius:6px;border-radius:6px;-webkit-transition:background .5s;-moz-transition:background .5s;-ms-transition:background .5s;transition:background .5s}
+.msgs_holder .unread_divider span.divider_label{background:white;margin:-0.3rem 0;float:right;padding:0 0 0 .5rem}
+.day_divider{background:white;margin:1.5rem 0;line-height:1.2rem;font-size:1rem;font-family:'Lato',sans-serif;color:#555459;font-weight:900;text-align:center;cursor:default;clear:both;position:relative}
+.day_divider hr{position:absolute;border-top:1px solid #DDD;width:100%;top:.6rem;margin:0}
+.day_divider_label{background:white;padding:0 1rem;display:inline-block;margin:0 auto;position:relative}
 
 
 #channels_col { 
@@ -139,7 +143,7 @@ textarea{width:460px;height:120px;padding:.5rem;font-size:15px;line-height:1.2re
 }
 #msgs_div .message .message_sender {
   font-weight: 900;
-  padding-right: .25rem;
+  padding-right: .5rem;
   color: #3d3c40 !important;
   margin-left: 0;
   font-style: normal;
@@ -158,6 +162,7 @@ textarea{width:460px;height:120px;padding:.5rem;font-size:15px;line-height:1.2re
   width:36px;
   margin-right: 0;
   margin-left:0;
+  font-family: 'Lato',sans-serif;
 }
 #msgs_div .message .message_content {
   margin-top: -1px;
