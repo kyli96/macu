@@ -23,6 +23,9 @@
             if (!currentCid && channels.length) {
                 currentCid = channels[0]._id;
             }
+            if (this.props.updateChannelHeader) {
+                this.props.updateChannelHeader(this.channels[this.channel_ids.indexOf(currentCid)]);
+            }
             this.props.getMsgs(currentCid, function (history) {
                 this.msgs = history; // need to merge in case of race condition
                 this.setState(
@@ -42,6 +45,9 @@
         }
     },
     onCurrentCidChange: function(new_cid) {
+        if (this.props.updateChannelHeader) {
+            this.props.updateChannelHeader(this.channels[this.channel_ids.indexOf(new_cid)]);
+        }
         this.props.getMsgs(new_cid, function(history) {
             this.msgs = history; 
             this.setState({currentCid: new_cid, msgs: this.msgs}, this.props.onRefreshMsgs);

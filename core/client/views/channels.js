@@ -16,8 +16,12 @@
     },
     render: function () {
         var createItem = function (channel, i) {
+            var classname = 'channel';
+            if (this.props.currentCid == channel._id) {
+                classname += ' active';
+            }
             return (
-                <li className="channel" key={i}>
+                <li className={classname} key={i}>
                     <a id={channel._id} onClick={this._onClickChannel.bind(this, i)} className="channel_name">#{channel.name}</a>
                 </li>
             );

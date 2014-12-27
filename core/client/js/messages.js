@@ -1,7 +1,8 @@
 ﻿var M = {
     currentCid: null,
     user: null,
-    messageClient: null
+    messageClient: null,
+    header: null
 };
 var API = {
     get: function(url, fn) {
@@ -37,6 +38,12 @@ var Mf = {
             return false;
         });
     },
+    renderHeader: function () {
+        var header_props = {
+            domain: { name: M.user.domain }
+        };
+        M.header = React.render(React.createElement(ChannelHeader, header_props), $('#header')[0]);
+    },
     renderMessageClient: function () {
         var client_props = {
             // initState: {
@@ -46,7 +53,8 @@ var Mf = {
             getMsgs: Mf.getMsgs,
             onRefreshMsgs: Mf.onRefreshMsgs,
             onClickCreateChannel: Mf.onClickCreateChannel,
-            onRefreshChannels: Mf.onRefreshChannels
+            onRefreshChannels: Mf.onRefreshChannels,
+            updateChannelHeader: Mf.updateChannelHeader
         };
         M.messageClient = React.render(React.createElement(MessageClient, client_props), 
             $('#client_body')[0]);
@@ -74,6 +82,10 @@ var Mf = {
         if (channel.domain == M.user.domain) {
             M.messageClient.onNewChannel(channel);
         }
+    },
+    updateChannelHeader: function (channel) {
+        M.currentCid = channel._id;
+        M.header.updateChannel(channel);
     },
     onClickCreateChannel: function () {
         if ($('#create_channel_modal').length === 0) {
@@ -131,12 +143,12 @@ var Wf = {
         }).trigger('resize');
     },
     resizeChannelsCol: function () {
-        $('#channels_col').height($(window).height());
+        $('#channels_col').height($(window).height() - $('#header').height());
     },
     resizeMessageScrollDiv: function () {
         var scroll_div = $('#messages_scroll_div');
         var msgs_div = $('#msgs_div');
-        var scroll_div_height = $(window).height() - $('#footer').height();
+        var scroll_div_height = $(window).height() - $('#footer').height() - $('#header').height();
         scroll_div.height(scroll_div_height);
         scroll_div.width($(window).width() - $('#channels_col').width());
     },

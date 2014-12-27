@@ -3,6 +3,7 @@
 <head>
   <title>{{user.name}}</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/font-awesome.css">
   <link rel="stylesheet" href="/css/messages.css">
 </head>
 <body>
@@ -17,6 +18,7 @@
   <script src="/js/build/messages.js"></script>
   <script src="/js/build/messageclient.js"></script>
   <script src="/js/build/createchannel.js"></script>
+  <script src="/js/build/channelheader.js"></script>
   <script src="/js/messages.js"></script>
   {{/ifInDevMode}}
 
@@ -29,6 +31,7 @@
         domain: "{{user.domain}}"
       };
     }
+    Mf.renderHeader();
     Mf.renderMessageClient();
     Mf.init();
     Wf.init();
