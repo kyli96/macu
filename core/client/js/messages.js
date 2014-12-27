@@ -109,37 +109,40 @@ var Mf = {
     onRefreshChannels: function() {
         Wf.resizeChannelsCol();
     },
-    onRefreshMsgs: function() {
+    onRefreshMsgs: function () {
         Wf.resizeMsgFiller();
+        if (!Scrollers.scrollPanes['messages_scroll_div']) {
+            Scrollers.init('messages_scroll_div');
+        } else {
+            Scrollers.scrollPanes['messages_scroll_div'].update();
+        }
     }
 }
 
 var Wf = {
-    init: function(){
-        $(window).on('resize', function(){
+    init: function () {
+        $(window).on('resize', function () {
             Wf.resizeChannelsCol();
             Wf.resizeMessageScrollDiv();
             Wf.resizeMsgFiller();
+            if (Scrollers.scrollPanes['messages_scroll_div']) {
+                Scrollers.scrollPanes['messages_scroll_div'].update();
+            }
         }).trigger('resize');
     },
-    resizeChannelsCol: function() {
+    resizeChannelsCol: function () {
         $('#channels_col').height($(window).height());
     },
     resizeMessageScrollDiv: function () {
         var scroll_div = $('#messages_scroll_div');
         var msgs_div = $('#msgs_div');
-        var msgs_height = $('#message_front').height() + msgs_div.height() + parseInt(msgs_div.css('padding-bottom'));
-        if (scroll_div.height() >= msgs_height || scroll_div.scrollTop() >= msgs_height - scroll_div.height()) {
-            Wf.stickBottom = true;
-        }
-        else {
-            Wf.stickBottom = false;
-        }
-        $('#messages_scroll_div').height($(window).height() - $('#footer').height());
+        var scroll_div_height = $(window).height() - $('#footer').height();
+        scroll_div.height(scroll_div_height);
+        scroll_div.width($(window).width() - $('#channels_col').width());
     },
     resizeMsgFiller: function () {
         var msgs_div = $('#msgs_div');
-        var msgs_height = $('#message_front').height() + msgs_div.height() + parseInt(msgs_div.css('padding-bottom'));
+        var msgs_height = $('#message_front').height() + msgs_div.height() + parseInt(msgs_div.css('padding-top')) + parseInt(msgs_div.css('padding-bottom'));
         var scroll_div_height = $('#messages_scroll_div').height();
         var filler = scroll_div_height - msgs_height;
         if (filler > 0) {
@@ -147,9 +150,78 @@ var Wf = {
         }
         else {
             $('#message_filler').height(0);
-            if (Wf.stickBottom) {
-                $('#messages_scroll_div').scrollTop(msgs_height - scroll_div_height);
-            }
         }
     }
+}
+
+var Scrollers = {
+    init: function (id) {
+        if (!id || !$('#' + id) || !$('#' + id).length) {
+            console.log('cannot find content element with id ' + id);
+            return;
+        }
+        Scrollers.scrollPanes[id] = new MacuScroller(id);
+    }
+}
+Scrollers.scrollPanes = {};
+
+// move to diff file
+var MacuScroller = function (id){
+    this.scroll_div = $('#' + id);
+    this.content = this.scroll_div.children('div');
+    this.init();
+}
+MacuScroller.prototype.init = function (){
+    this.bar = $('<div class="scroll_bar"></div>')
+    this.handle = $('<div class="scroll_handle"></div>')
+    this.handle_inner = $('<div class="scroll_handle_inner"></div>')
+    this.handle.append(this.handle_inner);
+    this.bar.append(this.handle);
+    var wrapper_id = 'scroll_wrapper_' + this.scroll_div.attr('id');
+    this.scroll_div.wrap('<div class="scroll_hider"></div>');
+    this.hider = this.scroll_div.parent();
+    this.hider.wrap('<div id="' + wrapper_id + '"></div>');
+    this.wrapper = $('#' + wrapper_id);
+    this.wrapper.prepend(this.bar);
+    this.hider = this.wrapper.find('.scroll_hider');
+    this.handle_border = parseInt(this.handle_inner.css('borderTopWidth'));
+    this.handle.css('left', 0 - this.handle_border);
+    this.hider.css('margin-right', this.handle.width() + this.handle_border);
+    this.stickBottom = true;
+    this.update();
+    this.scroll_div.scroll(this.updateHandlePosition.bind(this));
+}
+MacuScroller.prototype.update = function () {
+    var content_height = 0;
+    this.content.each(function () { content_height += $(this).height() + parseInt($(this).css('padding-top')) + parseInt($(this).css('padding-bottom')); })
+    this.content_height = content_height;
+    if (this.scroll_div.height() < content_height) {
+        this.bar.height(this.scroll_div.height() - parseInt(this.bar.css('margin-top')) - parseInt(this.bar.css('margin-bottom')));
+        this.handle.height(this.bar.height() * this.scroll_div.height() / content_height);
+        this.hider.width(this.scroll_div.width() - this.handle.width() - this.handle_border);
+        this.bar.css('margin-left', this.hider.width());
+        if (this.stickBottom) {
+            this.gotoBottom();
+        }
+        else {
+            this.updateHandlePosition();
+        }
+        this.bar.show();
+    }
+    else {
+        this.bar.hide();
+    }
+}
+MacuScroller.prototype.updateHandlePosition = function () {
+    var top = (this.scroll_div.scrollTop() * this.bar.height() / this.content_height);
+    if (this.scroll_div.scrollTop() >= this.content_height - this.scroll_div.height()) {
+        this.stickBottom = true;
+    }
+    else {
+        this.stickBottom = false;
+    }
+    this.handle.css('top', Math.max(0, top));
+}
+MacuScroller.prototype.gotoBottom = function () {
+    this.scroll_div.scrollTop(this.content_height - this.scroll_div.height());
 }

@@ -21,6 +21,14 @@ ul, ol {
 .normal {
   font-weight: normal !important;
 }
+.container-fluid {
+  padding-left: 0;
+  padding-right: 0;
+}
+.row {
+  margin-left: 0;
+  margin-right: 0;
+}
 label,button,input[type="button"],input[type="reset"],input[type="submit"],input[type="radio"],input[type="checkbox"]{cursor:pointer}
 .top_margin{margin-top:1rem !important}
 .list_more{display:inline-block;font-size:.8rem;font-weight:700;color:#ab9ba9 !important;border-bottom:1px dotted #ab9ba9;-webkit-transitionDISABLED:.1s .2s ease-out;-moz-transitionDISABLED:.1s .2s ease-out;-o-transitionDISABLED:.1s .2s ease-out;transitionDISABLED:.1s .2s ease-out;-webkit-transitionDISABLED:.1s;-moz-transitionDISABLED:.1s;-o-transitionDISABLED:.1s;transitionDISABLED:.1s;margin:.25rem 1rem}
@@ -42,18 +50,33 @@ input,textarea,.uneditable-input{width:206px}
 .modal p.mini{line-height:1.25rem}
 .modal input[type='text'],.modal textarea{width:75%;margin:0}
 textarea{width:460px;height:120px;padding:.5rem;font-size:15px;line-height:1.2rem;resize:vertical}
+
+.scroll_wrapper.debug{background:rgba(0,0,0,.5)}
+.scroll_hider{overflow:hidden}
+.scroll_hider.debug{overflow:visible !important;background:green}
+.scroll_bar,.scroll_bar *{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
+.scroll_bar{position:absolute;margin-top:3px;margin-bottom:3px;cursor:pointer;background:#f9f9f9;width:10px;-moz-border-radius:10px;-webkit-border-radius:10px;-khtml-border-radius:10px;border-radius:10px}
+.scroll_bar.debug{background:red}
+.scroll_handle{position:absolute;width:10px}
+.scroll_handle_inner{width:100%;height:100%;background:#d9d9de;border:1px solid #FFF;-moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px}
+.scroll_handle_inner.debug{border:1px solid black}
+#client-ui .scroll_bar{width:8px;background:#f0f0f0;-moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px}
+#client-ui .scroll_handle{width:14px}
+#client-ui .scroll_handle_inner{border:3px solid white;background:#d9d9de;-moz-border-radius:6px;-webkit-border-radius:6px;-khtml-border-radius:6px;border-radius:6px;-webkit-transition:background .5s;-moz-transition:background .5s;-ms-transition:background .5s;transition:background .5s}
+
+
 #channels_col { 
   background: #6f5499;
   width: 220px; 
   float: left; 
   position: relative; 
   font-family: 'Lato',sans-serif;
-  height: 1800px;
+  //height: 1800px;
 }
 #channels_col ul {
   list-style-type: none;
   text-align: left;
-  margin: 0 1rem 0;
+  margin: 0 1px 0 0;
   width: 204px;
 }
 #channels_col ul li {
@@ -80,7 +103,7 @@ textarea{width:460px;height:120px;padding:.5rem;font-size:15px;line-height:1.2re
   color: #fff;
   font-size: .8rem;
   line-height: 1.25rem;
-  margin: 0 2rem .1rem;
+  margin: 0 1rem .1rem;
   text-transform: uppercase;
   font-weight: 700;
   width: 160px;
