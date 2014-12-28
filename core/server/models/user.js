@@ -1,6 +1,7 @@
 ﻿var CollectionBase = require('./collectionBase'),
     ObjectID = require('mongodb').ObjectID,
     Channels = require('./channel').Channels,
+    Promise = require('bluebird'),
     Users;
 
 var USERS_COLLECTION = 'users';
