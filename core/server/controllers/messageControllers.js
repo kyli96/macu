@@ -1,6 +1,7 @@
 ﻿var User = require('../models/user').User,
     Channel = require('../models/channel'),
     Message = require('../models/message'),
+    Promise = require('bluebird'),
     messageControllers,
     connected_users = {},
     io;
@@ -34,25 +35,10 @@ messageControllers = {
             console.log('Missing t_id. All msgs should have target id.');
             return;
         }
-        var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
-        if ((obj.t_id.substring(0,1) != 'C')
-            || !hexCheck.test(obj.t_id.substring(1))) {
-            console.log('invalid target id: ' + obj.t_id);
-        }
-        var getTarget;
-        if (obj.t_id.substring(0, 1) == 'C') {
-            getTarget = Channel.Channel.findById;
-        }
-        getTarget(obj.t_id.substring(1)).then(function (target) {
-            if (!target) {
-                return Promise.reject(new Error('target not found'));
-            }
-            var msg = new Message(obj);
-            return target.recordMsg(msg);
-        }).catch(function (err) {
-            console.log('Failed to record message:' + err.stack);
+        var msg = new Message(obj);
+        messageControllers.processNewMessage(msg, socket).catch(function (err) {
+            console.log('error while processing message:' + err.stack);
         });
-        socket.broadcast.to(obj.t_id.substring(1)).emit('sendMsg', obj);
     },
     onNewChannel: function (channel) {
         if (channel.access == 'public' && connected_users['' + channel.domain] && connected_users['' + channel.domain].users) {
@@ -64,6 +50,30 @@ messageControllers = {
                 }
             }
         }
+    },
+    processNewMessage: function (msg, socket){
+        var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
+        if ((msg.t_id.substring(0,1) != 'C')
+            || !hexCheck.test(msg.t_id.substring(1))) {
+            console.log('invalid target id: ' + msg.t_id);
+        }
+        var getTarget;
+        if (msg.t_id.substring(0, 1) == 'C') {
+            getTarget = Channel.Channel.findById;
+        }
+        return getTarget(msg.t_id.substring(1)).then(function (target) {
+                if (!target) {
+                    return Promise.reject(new Error('target not found'));
+                }
+                return target.recordMsg(msg);
+            }).then(function () {
+                if (!socket) {
+                    io.to(msg.t_id.substring(1)).emit('sendMsg', msg);
+                }
+                else {
+                    socket.broadcast.to(msg.t_id.substring(1)).emit('sendMsg', msg);
+                }
+            });
     },
     init: function (mio) {
         io = mio;

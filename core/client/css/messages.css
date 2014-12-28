@@ -4,6 +4,10 @@
 body { 
   font: 16px Helvetica, Arial; 
 }
+@-ms-viewport{
+  width: device-width;
+  zoom: 1.0;
+}
 h2 {
   font-weight: 900;
   font-size: 36px;

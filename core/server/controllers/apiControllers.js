@@ -1,8 +1,8 @@
 ﻿var Channel = require('../models/channel'),
     User = require('../models/user').User,
     Users = require('../models/user').Users,
-    Message = require('../models/message'),
     Promise = require('bluebird'),
+    Message = require('../models/message'),
     MessageController = require('./messageControllers'),
     controllers;
 
@@ -100,26 +100,11 @@ controllers = {
             controllers.respondError(res, 'missing target id');
             return;
         }
-        var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
-        if ((req.body.t_id.substring(0,1) != 'C')
-            || !hexCheck.test(obj.t_id.substring(1))) {
-            controllers.respondError(res, 'invalid target id: ' + req.body.t_id);
-            return;
-        }
-        var getTarget;
-        if (req.body.t_id.substring(0, 1) == 'C') {
-            getTarget = Channel.Channel.findById;
-        }
-        getTarget(req.body.t_id).then(function (target) {
-            if (!target) {
-                return Promise.reject(new Error('target not found'));
-            }
-            var msg = new Message(req.body);
-            ts = msg.ts;
-            return target.recordMsg(msg);
-        }).then(function (r) { 
-            res.send({ok: true, ts: ts, t_id: id});
-        }).catch(function (err) {
+        var msg = new Message(req.body);
+        var ts = msg.ts;
+        MessageController.processNewMessage(msg).done(function () {
+            res.send({ok: true, ts: ts, t_id: msg.t_id});
+        }, function (err) {
             controllers.respondError(res, err);
         });
     },
