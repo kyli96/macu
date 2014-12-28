@@ -17,6 +17,8 @@ apiRoutes = function (){
         }
         res.status(400).send('unsupported action');
     });
+    
+    router.post('/messages', apiControllers.postMessage);
 
     return router;
 }

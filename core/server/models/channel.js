@@ -1,6 +1,7 @@
 ﻿var CollectionBase = require('./collectionBase'),
     Message = require('./message'),
     ObjectID = require('mongodb').ObjectID,
+    Promise = require('bluebird'),
     Channels;
 
 var CHANNELS_COLLECTION = 'channels';
@@ -46,10 +47,27 @@ Channels = {
     }
 }
 
+Channel.findById = function (id) {
+    var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
+    if (!hexCheck.test(id)) {
+        return Promise.reject(new Error('invalid id:' + id));
+    }
+    else {
+        var collection = new CollectionBase(CHANNELS_COLLECTION);
+        return collection.findOne({ '_id': ObjectID(id) })
+            .then(function (data) {
+                if (!data) {
+                    return null;
+                }
+                return new Channel(data);
+            });
+    }
+}
+
 Channel.prototype.save = function () {
     var collection = new CollectionBase(CHANNELS_COLLECTION);
     if (!this.owner || !this.name || !this.access || !this.domain) {
-        throw new Error('Missing required field(s)');
+        return Promise.reject(new Error('Missing required field(s)'));
     }
     if (this._id) {
         var updateProperties = {
@@ -77,20 +95,22 @@ Channel.prototype.save = function () {
 
 Channel.prototype.getHistory = function () {
     if (!this._id) {
-        throw new Error('channel is not created yet.');
+        return Promise.reject(new Error('channel is not created yet.'));
     }
     return Message.findByChannel(this._id);
 }
 
 Channel.prototype.recordMsg = function (msg) {
     if (!this._id) {
-        throw new Error('channel is not created yet.');
+        return Promise.reject(new Error('channel is not created yet.'));
     }
     var values = {
-        t_id: 'C'+this._id,
+        t_id: 'C' + this._id,
+        user_id: msg.user_id,
         username: msg.username,
         name: msg.name,
-        msg: msg.msg
+        msg: msg.msg,
+        ts: msg.ts
     };
     var message = new Message(values);
     return message.save();

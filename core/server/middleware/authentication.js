@@ -12,9 +12,6 @@ function onIoAuthorizeSuccess(data, accept) {
 }
 
 function onIoAuthorizeFail(data, message, error, accept) {
-    if (error) {
-        throw new Error(message);
-    }
     console.log('failed connecting to socket.io:', message);
     if (error)
         accept(new Error(message));

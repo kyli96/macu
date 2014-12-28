@@ -1,6 +1,7 @@
 ﻿var Channel = require('../models/channel'),
     User = require('../models/user').User,
     Users = require('../models/user').Users,
+    Message = require('../models/message'),
     Promise = require('bluebird'),
     MessageController = require('./messageControllers'),
     controllers;
@@ -10,8 +11,7 @@ controllers = {
         User.findById(req.params.id).done(function (results) {
             res.send(results);
         }, function (err) {
-            console.log(err);
-            res.status(500).send(err);
+            controllers.respondError(res, err);
         });
     },
     getChannels: function (req, res) {
@@ -19,8 +19,7 @@ controllers = {
         Channel.Channels.findByDomain(domain).done(function (results) {
             res.send(results);
         }, function(err) {
-            console.log(err);
-            res.status(500).send(err);
+            controllers.respondError(res, err);
         });
     },
     getUserChannels: function (req, res) {
@@ -36,13 +35,12 @@ controllers = {
             }).done(function(data) {
                 res.status(200).send(data);
             }, function(err) {
-                console.log(err);
-                res.status(500).send(err);
+                controllers.respondError(res, err);
             });
     },
     createChannel: function (req, res) {
         if (!req.body.name) {
-            res.status(400).send('Missing channel name.');
+            controllers.respondError(res, 'missing channel name');
             return;
         }
         var channel = new Channel.Channel(req.body);
@@ -58,8 +56,7 @@ controllers = {
             MessageController.onNewChannel(channel);
             res.status(201).send(channel);
         }, function(err) {
-            console.log(err);
-            res.status(500).send(err);
+            controllers.respondError(res, err);
         });
     },
     subscribeChannel: function (req, res) {
@@ -72,7 +69,7 @@ controllers = {
         var user = new User({_id:req.params.id});
         var cid = req.body.channel_id;
         if (!cid) {
-            res.status(400).send('Missing channel_id');
+            controllers.respondError(res, 'missing channel_id');
             return;
         }
         if (!User.prototype.isPrototypeOf(user)) {
@@ -81,29 +78,65 @@ controllers = {
         user.subscribeChannel(cid).done(function(r) {
             res.status(201).send(r);
         }, function(err) {
-            console.log(err);
-            res.status(500).send('Failed to subscribe to channel: '+err);
+            controllers.respondError(res, err);
         });
     },
     getChannelHistory: function (req, res) {
         var id = req.params.id;
         var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
         if (!hexCheck.test(id)) {
-            res.status(400).send({ error: 'invalid id' });
+            controllers.respondError(res, 'invalid id');
             return;
         }
         var channel = new Channel.Channel({_id:id});
         channel.getHistory().done(function (r) {
             res.send(r);
         }, function(err) {
-            console.log(err);
-            if (err.indexOf('unable to find') === 0) {
-                res.status(404).send(err);
-            }
-            else {
-                res.status(500).send(err);
-            }
+            controllers.respondError(res, err);
         });
+    },
+    postMessage: function (req, res) {
+        if (!req.body.t_id) {
+            controllers.respondError(res, 'missing target id');
+            return;
+        }
+        var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
+        if ((req.body.t_id.substring(0,1) != 'C')
+            || !hexCheck.test(obj.t_id.substring(1))) {
+            controllers.respondError(res, 'invalid target id: ' + req.body.t_id);
+            return;
+        }
+        var getTarget;
+        if (req.body.t_id.substring(0, 1) == 'C') {
+            getTarget = Channel.Channel.findById;
+        }
+        getTarget(req.body.t_id).then(function (target) {
+            if (!target) {
+                return Promise.reject(new Error('target not found'));
+            }
+            var msg = new Message(req.body);
+            ts = msg.ts;
+            return target.recordMsg(msg);
+        }).then(function (r) { 
+            res.send({ok: true, ts: ts, t_id: id});
+        }).catch(function (err) {
+            controllers.respondError(res, err);
+        });
+    },
+    respondError: function (res, err, status) {
+        console.log(err);
+        var res_status = 500;
+        if (status) {
+            res_status = status;
+        }
+        else if (err.indexOf('missing ') === 0
+            || err.indexOf('invalid ') === 0) {
+            res_status = 400;
+        }
+        else if (err.indexOf('not found') > 0) {
+            res_status = 404;
+        }
+        res.status(res_status).send({ ok: false, error: err });
     }
 }
 

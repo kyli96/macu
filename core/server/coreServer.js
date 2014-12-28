@@ -10,21 +10,6 @@ function CoreServer(rootApp) {
     this.connCounter = 0;
 }
 
-function onAuthorizeSuccess(data, accept) {
-    console.log('successful connection to socket.io');
-    accept();
-}
-
-function onAuthorizeFail(data, message, error, accept) {
-    if (error) {
-        throw new Error(message);
-    }
-    console.log('failed connecting to socket.io:', message);
-    if (error) {
-        accept(new Error(message));
-    }
-}
-
 CoreServer.prototype.start = function () {
     var self = this;
 

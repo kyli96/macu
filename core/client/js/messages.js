@@ -33,7 +33,7 @@ var Mf = {
         
         $('form').submit(function () {
             var msg = $('#message-input').val();
-            Mf.sendMsg(M.messageClient.state.currentCid, msg);
+            Mf.sendMsg('C' + M.messageClient.state.currentCid, msg);
             $('#message-input').val('');
             return false;
         });
@@ -64,7 +64,8 @@ var Mf = {
             return;
         }
         var msg_obj = {
-            t_id: t_id, 
+            t_id: t_id,
+            user_id: M.user._id,
             username: M.user.username, 
             name: M.user.name, 
             msg: msg, 
@@ -75,7 +76,6 @@ var Mf = {
         return true;
     },
     onNewMessage: function (obj) {
-        console.log('got new message');
         M.messageClient.onNewMessage(obj);
     },
     onNewChannel: function (channel) {

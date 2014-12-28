@@ -1,5 +1,6 @@
 ﻿var User = require('../models/user').User,
     Channel = require('../models/channel'),
+    Message = require('../models/message'),
     messageControllers,
     connected_users = {},
     io;
@@ -33,13 +34,25 @@ messageControllers = {
             console.log('Missing t_id. All msgs should have target id.');
             return;
         }
-        var channel = new Channel.Channel({ _id: obj.t_id });
-        channel.recordMsg(obj, function (err, r) {
-            if (err) {
-                console.log('Failed to record message:' + err);
+        var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
+        if ((obj.t_id.substring(0,1) != 'C')
+            || !hexCheck.test(obj.t_id.substring(1))) {
+            console.log('invalid target id: ' + obj.t_id);
+        }
+        var getTarget;
+        if (obj.t_id.substring(0, 1) == 'C') {
+            getTarget = Channel.Channel.findById;
+        }
+        getTarget(obj.t_id.substring(1)).then(function (target) {
+            if (!target) {
+                return Promise.reject(new Error('target not found'));
             }
+            var msg = new Message(obj);
+            return target.recordMsg(msg);
+        }).catch(function (err) {
+            console.log('Failed to record message:' + err.stack);
         });
-        socket.broadcast.to(obj.t_id).emit('sendMsg', obj);
+        socket.broadcast.to(obj.t_id.substring(1)).emit('sendMsg', obj);
     },
     onNewChannel: function (channel) {
         if (channel.access == 'public' && connected_users['' + channel.domain] && connected_users['' + channel.domain].users) {

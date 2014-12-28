@@ -19,12 +19,15 @@ function User(data) {
 User.findById = function (id) {
     var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
     if (!hexCheck.test(id)) {
-        throw new Error('invalid id');
+        return Promise.reject(new Error('invalid id'));
     }
     else {
         var collection = new CollectionBase(USERS_COLLECTION);
         return collection.findOne({ '_id': ObjectID(id) })
             .then(function (data) {
+                if (!data) {
+                    return null;
+                }
                 return new User(data);
             });
     }
@@ -45,7 +48,7 @@ User.findByCredentials = function (domain, username, password) {
 
 User.prototype.subscribeChannel = function(channel_id) {
     if (!this._id) {
-        throw new Error('Cannot find user id');
+        return Promise.reject(new Error('Cannot find user id'));
     }
     var id = this._id;
     if (!ObjectID.prototype.isPrototypeOf(id)) {
@@ -69,10 +72,10 @@ User.prototype.getChannels = function () {
 Users = {
     subscribeChannelForDomain: function (domain, channel_id) {
         if (!domain) {
-            throw new Error('Missing domain');
+            return Promise.reject( new Error('Missing domain'));
         }
         if (!channel_id) {
-            throw new Error('Missing channel_id');
+            return Promise.reject(new Error('Missing channel_id'));
         }
         var cid = channel_id;
         if (!ObjectID.prototype.isPrototypeOf(cid)) {

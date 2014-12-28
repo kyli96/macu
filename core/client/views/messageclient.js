@@ -39,7 +39,7 @@
         }.bind(this));
     },
     onNewMessage: function(msg) {
-        if (msg.t_id == this.state.currentCid) {
+        if (msg.t_id == 'C'+this.state.currentCid) {
             this.msgs.push(msg);
             this.setState({msgs: this.msgs}, this.props.onRefreshMsgs);
         }
