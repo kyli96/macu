@@ -19,6 +19,9 @@ apiRoutes = function (){
     });
     
     router.post('/messages', apiControllers.postMessage);
+    
+    router.get('/channel/:channel_id/hook/:hook_id', apiControllers.getHook);
+    router.post('/channel/:channel_id/hooks', apiControllers.createHook);
 
     return router;
 }

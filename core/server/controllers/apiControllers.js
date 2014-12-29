@@ -3,6 +3,7 @@
     Users = require('../models/user').Users,
     Promise = require('bluebird'),
     Message = require('../models/message'),
+    Hook = require('../models/hook'),
     MessageController = require('./messageControllers'),
     controllers;
 
@@ -54,7 +55,7 @@ controllers = {
             return new Promise(function (resolve) { resolve(); })
         }).done(function(r) {
             MessageController.onNewChannel(channel);
-            res.status(201).send(channel);
+            res.status(200).send(channel);
         }, function(err) {
             controllers.respondError(res, err);
         });
@@ -76,7 +77,7 @@ controllers = {
             user = new User(user);
         }
         user.subscribeChannel(cid).done(function(r) {
-            res.status(201).send(r);
+            res.status(200).send(r);
         }, function(err) {
             controllers.respondError(res, err);
         });
@@ -103,8 +104,35 @@ controllers = {
         var msg = new Message(req.body);
         var ts = msg.ts;
         MessageController.processNewMessage(msg).done(function () {
-            res.send({ok: true, ts: ts, t_id: msg.t_id});
+            res.status(200).send({ok: true, ts: ts, t_id: msg.t_id});
         }, function (err) {
+            controllers.respondError(res, err);
+        });
+    },
+    getHook: function (req, res) {
+        if (!req.params.hook_id) {
+            controllers.respondError(res, 'missing hook id');
+            return;
+        }
+        Hook.findById(req.params.hook_id).done(function (obj) { 
+            res.status(200).send(obj);
+        }, function(err) {
+            controllers.respondError(res, err);
+        });
+    },
+    createHook: function (req, res) {
+        var hook = new Hook(req.body);
+        hook.t_id = 'C' + req.params.channel_id;
+        hook.save().then(function (r) {
+            var status = 200;
+            if (!req.body._id) {
+                status = 201;
+                console.log('new hook created');
+            } else {
+                console.log('hook ' + req.body._id + ' updated');
+            }
+            res.status(status).send({ ok: true, ts: r.updated_at, url: '/api/channel/' + req.params.channel_id + '/hook/' + r._id });
+        }).catch(function (err) {
             controllers.respondError(res, err);
         });
     },
