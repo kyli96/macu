@@ -45,12 +45,10 @@ controllers = {
             return;
         }
         var channel = new Channel.Channel(req.body);
-        // set owner using session instead
-        var owner = new User({_id: req.body.owner});
-        channel.save().then(function (r) {
-            console.log(r.insertedCount + ' channel created.');
+        channel.save().then(function (obj) {
+            console.log('channel ' + obj._id + ' created.');
             if (channel.access == "public") {
-                return Users.subscribeChannelForDomain(channel.domain, channel._id);
+                return Users.subscribeChannelForDomain(obj.domain, obj._id);
             }
             return new Promise(function (resolve) { resolve(); })
         }).done(function(r) {
@@ -115,7 +113,7 @@ controllers = {
             return;
         }
         Hook.findById(req.params.hook_id).done(function (obj) { 
-            res.status(200).send(obj);
+            res.status(200).send(obj.getView());
         }, function(err) {
             controllers.respondError(res, err);
         });

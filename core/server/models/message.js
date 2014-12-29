@@ -2,8 +2,6 @@
     Promise = require('bluebird'),
     ObjectID = require('mongodb').ObjectID;
 
-var MESSAGES_COLLECTION = 'messages';
-
 function Message(values) {
     this._id = values._id || null;
     this.t_id = values.t_id || null;
@@ -21,9 +19,10 @@ function Message(values) {
     this._dbfields = ['t_id', 'user_id', 'username', 'name', 'msg', 'ts'];
 }
 
+Message.collectionName = 'messages';
+
 Message.findByChannel = function (t_id) {
-    var collection = new CollectionBase(MESSAGES_COLLECTION);
-    return collection.find({ t_id: 'C' + t_id }, {}, {ts:1});
+    return CollectionBase.find(Message, { t_id: 'C' + t_id }, {}, { ts: 1 });
 }
 
 Message.prototype.save = function () {
@@ -31,8 +30,7 @@ Message.prototype.save = function () {
     if (!self.t_id) {
         return Promise.reject(new Error('missing required field(s)'));
     }
-    var collection = new CollectionBase(MESSAGES_COLLECTION);
-    return collection.insertOne(self);
+    return this.insertOne(self);
 }
 
 module.exports = Message;

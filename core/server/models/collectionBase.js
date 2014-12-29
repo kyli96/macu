@@ -33,8 +33,9 @@ CollectionBase.prototype.getCollection = function () {
     });
 }
 
-CollectionBase.prototype.find = function (filter, modifiers, orders) {
-    return this.getCollection()
+CollectionBase.find = function (model_class, filter, modifiers, orders) {
+    var col = new CollectionBase(model_class.collectionName);
+    return col.getCollection()
         .then(function (collection) {
             return collection.findAsync(filter, modifiers);
         })
@@ -43,23 +44,45 @@ CollectionBase.prototype.find = function (filter, modifiers, orders) {
                 cursor = cursor.sort(orders);
             }
             return cursor.toArrayAsync();
+        })
+        .then(function (r) {
+            var objs = [];
+            for (var i = 0; i < r.length; i++) {
+                objs[i] = new model_class(r[i]);
+            }
+            return objs;
         });
 }
 
-CollectionBase.prototype.findAll = function () {
-    return this.getCollection()
+CollectionBase.findAll = function (model_class) {
+    var col = new CollectionBase(model_class.collectionName);
+    return col.getCollection()
         .then(function (collection) {
             return collection.findAsync();
         })
         .then(function(cursor) {
             return cursor.toArrayAsync();
+        })
+        .then(function (r) {
+            var objs = [];
+            for (var i = 0; i < r.length; i++) {
+                objs[i] = new model_class(r[i]);
+            }
+            return objs;
         });
 }
 
-CollectionBase.prototype.findOne = function (filter) {
-    return this.getCollection()
+CollectionBase.findOne = function (model_class, filter) {
+    var col = new CollectionBase(model_class.collectionName);
+    return col.getCollection()
         .then(function (col) {
             return col.findOneAsync(filter);
+        })
+        .then(function (data) {
+            if (!data) {
+                return null;
+            }
+            return new model_class(data);
         });
 }
 
@@ -73,13 +96,7 @@ CollectionBase.findById = function (model_class, id) {
         if (!ObjectID.prototype.isPrototypeOf(_id)) {
             _id = new ObjectID(_id);
         }
-        var col = new CollectionBase(model_class.collectionName);
-        return col.findOne({ _id: _id }).then(function (data) {
-            if (!data) {
-                return null;
-            }
-            return new model_class(data);
-        });
+        return CollectionBase.findOne(model_class, { _id: _id });
     }
 }
 
@@ -142,6 +159,27 @@ CollectionBase.prototype.save = function () {
                 return this;
             }.bind(this));
     }
+}
+
+CollectionBase.prototype.getView = function (filter) {
+    var _filter = filter;
+    if (!_filter) {
+        _filter = this._dbfields;
+        if (_filter.indexOf('_id') === -1) {
+            _filter.unshift('_id');
+        }
+        if (_filter.indexOf('updated_at') === -1) {
+            _filter.push('updated_at');
+        }
+        if (_filter.indexOf('created_at') === -1) {
+            _filter.push('created_at');
+        }
+    }
+    var view = {};
+    for (var i = 0; i < _filter.length; i++) {
+        view[_filter[i]] = this[_filter[i]];
+    }
+    return view;
 }
 
 module.exports = CollectionBase;

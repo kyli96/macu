@@ -13,6 +13,8 @@ function Hook(values) {
     this.t_id = values.t_id || '';
     this.active = values.active ? true : false;
     this.config = {};
+    this.updated_at = values.updated_at;
+    this.created_at = values.created_at;
 
     if (this._id && !ObjectID.prototype.isPrototypeOf(this._id)) {
         this._id = new ObjectID(this._id);
