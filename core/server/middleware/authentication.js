@@ -38,10 +38,10 @@ authentication = {
     authorizeExpress: function () {
         return function (req, res, next) {
             if (req.isAuthenticated()) {
-                console.log('user ' + req.user.username + ' is authenticated.');
+                req.log.info('user ' + req.user.username + ' is authenticated.');
                 return next();
             }
-            console.log('user is not authenticated. redirecting to signin page.');
+            req.log.info('user is not authenticated. redirecting to signin page.');
             res.redirect('/');
         }
     }

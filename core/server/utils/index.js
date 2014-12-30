@@ -1,4 +1,6 @@
-﻿var utils;
+﻿var bunyan = require('bunyan'),
+    uuid = require('node-uuid'),
+    utils;
 
 utils = {
     isProdMode: function () {
@@ -14,6 +16,20 @@ utils = {
             obj = prop;
         }
         return null;
+    },
+    createLogger: function (name, parent) {
+        var logger;
+        if (!parent) {
+            logger = bunyan.createLogger({ name: name });
+        }
+        else {
+            logger = parent;
+        }
+        switch (name) {
+            case 'req':
+                logger = parent.child({ reqId: uuid.v1() });
+        }
+        return logger;
     }
 }
 

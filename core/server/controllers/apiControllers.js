@@ -26,7 +26,7 @@ controllers = {
     getUserChannels: function (req, res) {
         //var user = req.user;
         //if (!user) {
-        //    console.log('Unable to get user from req obj');
+        //    req.log.info('Unable to get user from req obj');
         //    res.status(401).send('Unable to get user from request');
         //    return;
         //}
@@ -46,7 +46,7 @@ controllers = {
         }
         var channel = new Channel.Channel(req.body);
         channel.save().then(function (obj) {
-            console.log('channel ' + obj._id + ' created.');
+            req.log.info('channel ' + obj._id + ' created.');
             if (channel.access == "public") {
                 return Users.subscribeChannelForDomain(obj.domain, obj._id);
             }
@@ -61,7 +61,7 @@ controllers = {
     subscribeChannel: function (req, res) {
         //var user = req.user;
         //if (!user) {
-        //    console.log('Unable to get user from req obj');
+        //    req.log.info('Unable to get user from req obj');
         //    res.status(401).send('Unable to get user from request');
         //    return;
         //}
@@ -125,9 +125,9 @@ controllers = {
             var status = 200;
             if (!req.body._id) {
                 status = 201;
-                console.log('new hook created');
+                req.log.info('new hook created');
             } else {
-                console.log('hook ' + req.body._id + ' updated');
+                req.log.info('hook ' + req.body._id + ' updated');
             }
             res.status(status).send({ ok: true, ts: r.updated_at, url: '/api/channel/' + req.params.channel_id + '/hook/' + r._id });
         }).catch(function (err) {
@@ -135,7 +135,7 @@ controllers = {
         });
     },
     respondError: function (res, err, status) {
-        console.log(err);
+        req.log.info(err);
         var res_status = 500;
         if (status) {
             res_status = status;

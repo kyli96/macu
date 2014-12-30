@@ -8,13 +8,19 @@
     authentication = require('./authentication'),
     messenger = require('./messenger'),
     exphbs = require('express-handlebars'),
-    utils = require('../utils'),
+    Utils = require('../utils'),
     flash = require('connect-flash'),
+    createReqLog,
     init;
+
 
 init = function (coreApp, apiApp){
     authStragegies = authStrategies;
-
+    
+    coreApp.use(function (req, res, next) {
+        req.log = Utils.createLogger('req', coreApp.log);
+        next();
+    });
     coreApp.use(cookieParser());
     coreApp.use(bodyParser.json());
     coreApp.use(bodyParser.urlencoded({ extended: true }));
@@ -29,13 +35,13 @@ init = function (coreApp, apiApp){
         layoutsDir: 'core/server/views/layouts/',
         helpers: {
             ifInDevMode: function (options) {
-                if (!utils.isProdMode()) {
+                if (!Utils.isProdMode()) {
                     return options.fn(this);
                 }
                 return '';
             },
             ifInProdMode: function (options) {
-                if (utils.isProdMode(coreApp)) {
+                if (Utils.isProdMode(coreApp)) {
                     return options.fn(this);
                 }
                 return '';
@@ -48,6 +54,10 @@ init = function (coreApp, apiApp){
     coreApp.use('/messages', authentication.authorizeExpress());
     // coreApp.use('/api', authentication.authorizeExpress());
     
+    apiApp.use(function (req, res, next) {
+        req.log = Utils.createLogger('req', apiApp.log);
+        next();
+    });
     apiApp.use(routes.api());
     
     coreApp.use('/api', apiApp);
@@ -55,7 +65,7 @@ init = function (coreApp, apiApp){
     coreApp.post('/login', 
         passport.authenticate('domain', { failureRedirect: '/', failureFlash: true }),
         function (req, res) {
-            console.log('logging in ' + req.body.username);
+            req.log.info('logging in ' + req.body.username);
         	res.redirect('/messages');
     });
 
