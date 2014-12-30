@@ -1,7 +1,10 @@
 ﻿var User = require('../models/user').User,
     Channel = require('../models/channel'),
     Message = require('../models/message'),
+    Hook = require('../models/hook'),
     Promise = require('bluebird'),
+    Request = require('request'),
+    Url = require('url'),
     messageControllers,
     connected_users = {},
     io;
@@ -73,7 +76,59 @@ messageControllers = {
                 else {
                     socket.broadcast.to(msg.t_id.substring(1)).emit('sendMsg', msg);
                 }
+                messageControllers.processHooks(msg, ['mention']);
             });
+    },
+    processHooks: function (msg, events) {
+        if (!msg || !events) {
+            return;
+        }
+        return Hook.findByTargetId(msg.t_id).then(function (hooks) {
+            if (!hooks) {
+                return;
+            }
+            for (var i = 0; i < hooks.length; i++) {
+                var hook = hooks[i];
+                if (!hook.events) {
+                    continue;
+                }
+                for (var j = 0; j < events.length; j++) {
+                    if (hook.events.indexOf(events[j]) === -1) {
+                        continue;
+                    }
+                    switch (events[j]) {
+                        case 'mention':
+                            if (msg.msg.toLowerCase().indexOf(hook.name.toLowerCase() + ':') === 0) {
+                                Request.post({
+                                    url: Url.parse(hook.config.url),
+                                    json: true,
+                                    body: {msg: msg.msg}
+                                }, function (err, res, body) {
+                                    if (err) {
+                                        console.log('failed kicking hook ' + hook._id + ':' + err);
+                                        return;
+                                    }
+                                    if (res.statusCode >= 300) {
+                                        console.log('hook ' + hook._id + ' responded with ' + res.statusCode);
+                                        return;
+                                    }
+                                    if (!body || !body.msg) {
+                                        return;
+                                    }
+                                    var resMsg = new Message(body);
+                                    resMsg.t_id = msg.t_id;
+                                    resMsg.user_id = hook._id;
+                                    resMsg.name = hook.name;
+                                    messageControllers.processNewMessage(resMsg);
+                                });
+                            }
+                            break;
+                        default:
+                            continue;
+                    }
+                }
+            }
+        });
     },
     init: function (mio) {
         io = mio;

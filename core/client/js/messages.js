@@ -226,7 +226,7 @@ MacuScroller.prototype.update = function () {
 }
 MacuScroller.prototype.updateHandlePosition = function () {
     var top = (this.scroll_div.scrollTop() * this.bar.height() / this.content_height);
-    if (this.scroll_div.scrollTop() >= this.content_height - this.scroll_div.height()) {
+    if (this.scroll_div.scrollTop() >= this.content_height - this.scroll_div.height() - 10) {
         this.stickBottom = true;
     }
     else {

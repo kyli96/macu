@@ -1,7 +1,7 @@
 {
-  "name": "socket-chat",
+  "name": "macu",
   "version": "0.0.1",
-  "description": "test",
+  "description": "Core Macu",
   "dependencies": {
     "bluebird": "^2.4.2",
     "body-parser": "^1.10.0",
@@ -15,6 +15,7 @@
     "passport-local": "^1.0.0",
     "passport-strategy": "^1.0.0",
     "passport.socketio": "^3.4.1",
+    "request": "^2.51.0",
     "socket.io": "^1.2.1"
   }
 }

@@ -40,6 +40,10 @@ Hook.findById = function (id) {
     return CollectionBase.findById(Hook, id);
 }
 
+Hook.findByTargetId = function (t_id) {
+    return CollectionBase.find(Hook, {t_id: t_id}, {}, null);
+}
+
 Hook.prototype.save = function () {
     var self = this;
     if (!self.name

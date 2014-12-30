@@ -43,7 +43,7 @@ Channels = {
 }
 
 Channel.findById = function (id) {
-    return CollectionBase.findById(User, id);
+    return CollectionBase.findById(Channel, id);
 }
 
 Channel.prototype.save = function () {

@@ -30,7 +30,8 @@ Message.prototype.save = function () {
     if (!self.t_id) {
         return Promise.reject(new Error('missing required field(s)'));
     }
-    return this.insertOne(self);
+    var col = new CollectionBase(Message.collectionName);
+    return col.insertOne(self);
 }
 
 module.exports = Message;
