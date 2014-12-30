@@ -4,11 +4,14 @@
     MongoDB,
     MongoClient,
     MONGO_URL,
-    connection;
+    connection,
+    logger;
 
 MongoDB = Promise.promisifyAll(require('mongodb'));
 MongoClient = Promise.promisifyAll(MongoDB.MongoClient);
 Promise.promisifyAll(MongoDB.Cursor.prototype);
+
+logger = Utils.createLogger('CollectionBase');
 
 if (Utils.isProdMode()) {
     MONGO_URL = 'mongodb://localhost:27017/macu';
@@ -24,13 +27,17 @@ function CollectionBase(collectionName) {
 CollectionBase.prototype.getCollection = function () {
     var self = this;
     if (!connection) {
-        console.log('connect new db connection');
+        logger.info('connect new db connection');
         connection = MongoClient.connectAsync(MONGO_URL);
     }
     return connection.then(function(db){
         var col = db.collection(self.collectionName);
         return col;
     });
+}
+
+CollectionBase.getLogger = function () {
+    return logger;
 }
 
 CollectionBase.find = function (model_class, filter, modifiers, orders) {

@@ -14,7 +14,7 @@ Lantern.prototype.start = function () {
     self.httpServer = httpServer;
 
     self.httpServer.listen(4080, function () {
-        console.log('Lantern is listening at *:' + self.httpServer.address().port);
+        self.rootApp.log.info('Lantern is listening at *:' + self.httpServer.address().port);
     });
 }
 

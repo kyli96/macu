@@ -6,15 +6,15 @@
 var sessionStore = new session.MemoryStore();
 var COOKIE_SECRET = 'little secret';
 
-function onIoAuthorizeSuccess(data, accept) {
-    console.log(data['user'].username + ' successful connection to socket.io');
-    accept();
+function onIoAuthorizeSuccess(data, next) {
+    data.log.info(data['user'].username + ' successful connection to socket.io');
+    next();
 }
 
-function onIoAuthorizeFail(data, message, error, accept) {
-    console.log('failed connecting to socket.io:', message);
+function onIoAuthorizeFail(data, message, error, next) {
+    data.log.warn('failed connecting to socket.io:', message);
     if (error)
-        accept(new Error(message));
+        next(new Error(message));
 }
 
 authentication = {

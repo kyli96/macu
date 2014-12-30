@@ -11,36 +11,36 @@
 
 messageControllers = {
     onConnection: function (socket, user) {
-        console.log(user.username + ' connected');
+        socket.request.log.info(user.username + ' connected');
         if (!connected_users['' + user.domain]) {
             connected_users['' + user.domain] = { users: {} };
         }
         connected_users['' + user.domain].users["" + user._id] = { socket: socket };
         user.getChannels().done(function (data) {
             for (var i = 0; i < data.length; i++) {
-                console.log('joining channel '+data[i]._id);
+                socket.request.log.info('joining channel '+data[i]._id);
                 socket.join(data[i]._id);
             }
         }, function (err) { 
-            console.log('Unable to get channels for user ' + user.username);
+            socket.request.log.error('Unable to get channels for user ' + user.username);
         });
         socket.emit('profile', user);
     },
-    onDisconnection: function (user) {
+    onDisconnection: function (socket, user) {
         if (connected_users['' + user.domain]) {
             connected_users['' + user.domain].users['' + user._id] = null;
         }
-        console.log(user.name + ' disconnected');
+        socket.request.log.info(user.name + ' disconnected');
     },
     onSendMsg: function (obj) {
         var socket = this;
         if (!obj.t_id) {
-            console.log('Missing t_id. All msgs should have target id.');
+            socket.request.log.error('Missing t_id. All msgs should have target id.');
             return;
         }
         var msg = new Message(obj);
-        messageControllers.processNewMessage(msg, socket).catch(function (err) {
-            console.log('error while processing message:' + err.stack);
+        messageControllers.processNewMessage(msg, socket.request.log, socket).catch(function (err) {
+            socket.request.log.error('error while processing message:' + err.stack);
         });
     },
     onNewChannel: function (channel) {
@@ -54,11 +54,12 @@ messageControllers = {
             }
         }
     },
-    processNewMessage: function (msg, socket){
+    processNewMessage: function (msg, logger, socket){
         var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
         if ((msg.t_id.substring(0,1) != 'C')
             || !hexCheck.test(msg.t_id.substring(1))) {
-            console.log('invalid target id: ' + msg.t_id);
+            socket.request.log.error('invalid target id: ' + msg.t_id);
+            return;
         }
         var getTarget;
         if (msg.t_id.substring(0, 1) == 'C') {
@@ -76,10 +77,10 @@ messageControllers = {
                 else {
                     socket.broadcast.to(msg.t_id.substring(1)).emit('sendMsg', msg);
                 }
-                messageControllers.processHooks(msg, ['mention']);
+                messageControllers.processHooks(msg, ['mention'], logger);
             });
     },
-    processHooks: function (msg, events) {
+    processHooks: function (msg, events, logger) {
         if (!msg || !events) {
             return;
         }
@@ -105,11 +106,11 @@ messageControllers = {
                                     body: {msg: msg.msg}
                                 }, function (err, res, body) {
                                     if (err) {
-                                        console.log('failed kicking hook ' + hook._id + ':' + err);
+                                        logger.warn('failed kicking hook ' + hook._id + ':' + err);
                                         return;
                                     }
                                     if (res.statusCode >= 300) {
-                                        console.log('hook ' + hook._id + ' responded with ' + res.statusCode);
+                                        logger.warn('hook ' + hook._id + ' responded with ' + res.statusCode);
                                         return;
                                     }
                                     if (!body || !body.msg) {
@@ -119,7 +120,7 @@ messageControllers = {
                                     resMsg.t_id = msg.t_id;
                                     resMsg.user_id = hook._id;
                                     resMsg.name = hook.name;
-                                    messageControllers.processNewMessage(resMsg);
+                                    messageControllers.processNewMessage(resMsg, logger);
                                 });
                             }
                             break;

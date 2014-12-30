@@ -6,7 +6,7 @@
     passport = require('passport'),
     authStrategies = require('./authStrategies'),
     authentication = require('./authentication'),
-    messenger = require('./messenger'),
+    Messenger = require('./messenger'),
     exphbs = require('express-handlebars'),
     Utils = require('../utils'),
     flash = require('connect-flash'),
@@ -73,4 +73,4 @@ init = function (coreApp, apiApp){
 }
 
 module.exports = init;
-module.exports.messenger = messenger;
+module.exports.Messenger = Messenger;

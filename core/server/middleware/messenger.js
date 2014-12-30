@@ -1,25 +1,39 @@
 ﻿var authentication = require('./authentication'),
+    sio = require('socket.io'),
     messageControllers = require('../controllers/messageControllers'),
     User = require('../models/user').User,
-    io,
-    init;
+    Utils = require('../utils');
 
-function onConnection(socket) {
-    var user = new User(socket.request['user']); //from passport.socketio
-    messageControllers.onConnection(socket, user);
-    setHandlers(socket, user);
+function IoServer(httpServer, expApp) {
+    this.io = sio(httpServer);
+    this.app = expApp;
 }
 
-function setHandlers(socket, user) {
-    socket.on('disconnect', function () { messageControllers.onDisconnection(user); });
+IoServer.prototype.setLogger = function () {
+    var self = this;
+    return function (socket, next) {
+        socket.request.log = self.app.log.child({ socket_id: socket.id });
+        next();
+    };
+}
+
+IoServer.onConnection = function (socket) {
+    var user = new User(socket.request['user']); //from passport.socketio
+    messageControllers.onConnection(socket, user);
+    IoServer.setHandlers(socket, user);
+}
+
+IoServer.setHandlers = function (socket, user) {
+    socket.on('disconnect', function () { messageControllers.onDisconnection(socket, user); });
     socket.on('sendMsg', messageControllers.onSendMsg.bind(socket));
 }
 
-init = function (ioServer) {
-    io = ioServer;
-    io.use(authentication.authorizeIo());
-    messageControllers.init(io);
-    io.on('connection', onConnection);
+IoServer.prototype.init = function () {
+    var self = this;
+    self.io.use(self.setLogger());
+    self.io.use(authentication.authorizeIo());
+    messageControllers.init(self.io);
+    self.io.on('connection', IoServer.onConnection);
 }
 
-module.exports = init;
+module.exports = IoServer;

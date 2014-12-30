@@ -101,7 +101,7 @@ controllers = {
         }
         var msg = new Message(req.body);
         var ts = msg.ts;
-        MessageController.processNewMessage(msg).done(function () {
+        MessageController.processNewMessage(msg, req.log).done(function () {
             res.status(200).send({ok: true, ts: ts, t_id: msg.t_id});
         }, function (err) {
             controllers.respondError(res, err);

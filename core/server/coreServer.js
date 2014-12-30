@@ -1,6 +1,5 @@
 ﻿var http = require('http'),
-    sio = require('socket.io'),
-    middleware = require('./middleware');
+    Messenger = require('./middleware').Messenger;
 
 function CoreServer(rootApp) {
     this.rootApp = rootApp;
@@ -15,12 +14,11 @@ CoreServer.prototype.start = function () {
 
     var httpServer = http.Server(self.rootApp);
     self.httpServer = httpServer;
-    var io = sio(httpServer);
-    self.ioServer = io;
-    middleware.messenger(io);
+    self.ioServer = new Messenger(httpServer, self.rootApp);
+    self.ioServer.init();
 
     self.httpServer.listen(3000, function () {
-        console.log('Server listening at *:3000');
+        self.rootApp.log.info('Server listening at *:3000');
     });
 }
 

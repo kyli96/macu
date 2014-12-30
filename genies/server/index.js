@@ -1,6 +1,7 @@
 ﻿var express = require('express'),
     bodyParser = require('body-parser'),
     Lantern = require('./lantern'),
+    Utils = require('../../core/server/utils'),
     dummyBot,
     routes;
 
@@ -21,6 +22,11 @@ routes = function () {
 
 function init(options){
     var app = express();
+    app.log = Utils.createLogger('geniesApp');
+    app.use(function (req, res, next) {
+        req.log = Utils.createLogger('req', app.log);
+        next();
+    });
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(routes());
