@@ -1,4 +1,5 @@
 ﻿var User = require('../models/user').User,
+    Users = require('../models/user').Users,
     Channel = require('../models/channel'),
     Message = require('../models/message'),
     Hook = require('../models/hook'),
@@ -11,54 +12,73 @@
 
 messageControllers = {
     onConnection: function (socket, user) {
-        socket.request.log.info(user.username + ' connected');
+        var log = socket.request.log;
+        log.info(user.email + ' connected');
         if (!connected_users['' + user.domain]) {
-            connected_users['' + user.domain] = { users: {} };
+            connected_users['' + user.domain] = { connections: {} };
         }
-        connected_users['' + user.domain].users["" + user._id] = { socket: socket };
+        connected_users['' + user.domain].connections["" + socket.id] = { socket: socket, user_id: user._id };
         user.getChannels().done(function (data) {
             for (var i = 0; i < data.length; i++) {
-                socket.request.log.info('joining channel '+data[i]._id);
+                log.debug('joining channel ' + data[i]._id);
                 socket.join(data[i]._id);
             }
-        }, function (err) { 
-            socket.request.log.error('Unable to get channels for user ' + user.username);
+        }, function (err) {
+            log.error('Unable to get channels for user ' + user.email);
         });
         socket.emit('profile', user);
     },
     onDisconnection: function (socket, user) {
+        var log = socket.request.log;
         if (connected_users['' + user.domain]) {
-            connected_users['' + user.domain].users['' + user._id] = null;
+            connected_users['' + user.domain].connections['' + socket.id] = null;
         }
-        socket.request.log.info(user.name + ' disconnected');
+        log.info(user.name + ' disconnected');
     },
     onSendMsg: function (obj) {
         var socket = this;
+        var log = socket.request.log;
         if (!obj.t_id) {
-            socket.request.log.error('Missing t_id. All msgs should have target id.');
+            log.error('Missing t_id. All msgs should have target id.');
             return;
         }
         var msg = new Message(obj);
-        messageControllers.processNewMessage(msg, socket.request.log, socket).catch(function (err) {
-            socket.request.log.error('error while processing message:' + err.stack);
+        messageControllers.processNewMessage(msg, log, socket).catch(function (err) {
+            log.error('error while processing message:' + err.stack);
         });
     },
     onNewChannel: function (channel) {
-        if (channel.access == 'public' && connected_users['' + channel.domain] && connected_users['' + channel.domain].users) {
-            var users = connected_users['' + channel.domain].users;
-            for (user_id in users) {
-                if (users[user_id].socket) {
-                    users[user_id].socket.join(channel._id);
-                    users[user_id].socket.emit('newChannel', channel);
+        if (channel.access == 'public' && connected_users['' + channel.domain] && connected_users['' + channel.domain].connections) {
+            var connections = connected_users['' + channel.domain].connections;
+            for (socket_id in connections) {
+                if (connections[socket_id].socket) {
+                    connections[socket_id].socket.join(channel._id);
+                    connections[socket_id].socket.emit('newChannel', channel);
                 }
             }
         }
+    },
+    onCreateChannel: function (data) {
+        var socket = this;
+        var log = socket.request.log;
+        var channel = new Channel.Channel(data);
+        channel.save().then(function (obj) {
+            log.info('channel ' + obj._id + ' created.');
+            //if (channel.access == "public") {
+            //    return Users.subscribeChannelForDomain(obj.domain, obj._id);
+            //}
+            return new Promise(function (resolve) { resolve(); })
+        }).then(function(r) {
+            messageControllers.onNewChannel(channel);
+        }).catch(function(err) {
+            log.error(err, 'failed creating channel');
+        });
     },
     processNewMessage: function (msg, logger, socket){
         var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
         if ((msg.t_id.substring(0,1) != 'C')
             || !hexCheck.test(msg.t_id.substring(1))) {
-            socket.request.log.error('invalid target id: ' + msg.t_id);
+            logger.error('invalid target id: ' + msg.t_id);
             return;
         }
         var getTarget;

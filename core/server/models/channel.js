@@ -67,7 +67,6 @@ Channel.prototype.recordMsg = function (msg) {
     var values = {
         t_id: 'C' + this._id,
         user_id: msg.user_id,
-        username: msg.username,
         name: msg.name,
         msg: msg.msg,
         ts: msg.ts

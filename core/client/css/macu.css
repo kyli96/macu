@@ -50,7 +50,11 @@ body {
 }
 
 .form-signin input[type="password"] {
-  margin-bottom: 20px;
+  margin-bottom: -1px;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+
+.form-signin input.last-input {
+  margin-bottom: 20px;
 }

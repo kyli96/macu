@@ -20,6 +20,8 @@
   <script src="/js/build/messageclient.js"></script>
   <script src="/js/build/createchannel.js"></script>
   <script src="/js/build/channelheader.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/scroller.js"></script>
   <script src="/js/messages.js"></script>
   {{/ifInDevMode}}
 
@@ -27,7 +29,6 @@
     if (!M.user) {
       M.user = {
         _id: "{{user._id}}",
-        username: "{{user.username}}",
         name: "{{user.name}}",
         domain: "{{user.domain}}"
       };

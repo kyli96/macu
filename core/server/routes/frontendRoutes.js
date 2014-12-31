@@ -10,6 +10,8 @@ frontendRoutes = function (){
     router.use('/fonts', express.static(path.join(__dirname, '/../../client/fonts')));
 
     router.get('/', frontendControllers.showSignin);
+    router.get('/signup', frontendControllers.showSignup);
+    router.post('/signup', frontendControllers.processSignup);
     router.get('/messages', frontendControllers.showMessages);
     return router;
 }

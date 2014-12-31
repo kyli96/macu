@@ -65,7 +65,7 @@ init = function (coreApp, apiApp){
     coreApp.post('/login', 
         passport.authenticate('domain', { failureRedirect: '/', failureFlash: true }),
         function (req, res) {
-            req.log.info('logging in ' + req.body.username);
+            req.log.info('logging in ' + req.body.email);
         	res.redirect('/messages');
     });
 

@@ -10,12 +10,11 @@ function User(data) {
     this.className = 'User';
 
     this._id = data._id || null;
-    this.username = data.username || '';
     this.name = data.name || '';
     this.email = data.email || '';
     this.domain = data.domain || '';
     this.subscribed = data.subscribed || [];
-    this._dbfields = ['username', 'name', 'email', 'domain', 'subscribed'];
+    this._dbfields = ['name', 'email', 'domain', 'subscribed'];
 }
 Util.inherits(User, CollectionBase);
 
@@ -25,8 +24,12 @@ User.findById = function (id) {
     return CollectionBase.findById(User, id);
 }
 
-User.findByCredentials = function (domain, username, password) {
-    return CollectionBase.findOne(User, { domain: domain, username: username, password: password });
+User.findBySignupInfo = function (domain, email, name) {
+    return CollectionBase.findOne(User, { domain: domain, $or: [{ email: email }, { name: name }] });
+}
+
+User.findByCredentials = function (domain, email, password) {
+    return CollectionBase.findOne(User, { domain: domain, email: email, password: password });
 }
 
 User.prototype.subscribeChannel = function(channel_id) {
@@ -46,10 +49,10 @@ User.prototype.subscribeChannel = function(channel_id) {
 }
 
 User.prototype.getChannels = function () {
-    if (!this.subscribed || this.subscribed.length == 0) {
-        return new Promise(function(resolve) {resolve([]);});
-    }
-    return Channels.findByIds(this.subscribed);
+    //if (!this.subscribed || this.subscribed.length == 0) {
+    //    return new Promise(function(resolve) {resolve([]);});
+    //}
+    return Channels.findByDomain(this.domain);
 }
 
 Users = {

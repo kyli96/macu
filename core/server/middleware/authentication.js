@@ -7,7 +7,7 @@ var sessionStore = new session.MemoryStore();
 var COOKIE_SECRET = 'little secret';
 
 function onIoAuthorizeSuccess(data, next) {
-    data.log.info(data['user'].username + ' successful connection to socket.io');
+    data.log.info(data['user'].email + ' successful connection to socket.io');
     next();
 }
 
@@ -38,7 +38,7 @@ authentication = {
     authorizeExpress: function () {
         return function (req, res, next) {
             if (req.isAuthenticated()) {
-                req.log.info('user ' + req.user.username + ' is authenticated.');
+                req.log.info('user ' + req.user.email + ' is authenticated.');
                 return next();
             }
             req.log.info('user is not authenticated. redirecting to signin page.');

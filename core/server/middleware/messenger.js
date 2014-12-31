@@ -26,6 +26,7 @@ IoServer.onConnection = function (socket) {
 IoServer.setHandlers = function (socket, user) {
     socket.on('disconnect', function () { messageControllers.onDisconnection(socket, user); });
     socket.on('sendMsg', messageControllers.onSendMsg.bind(socket));
+    socket.on('createChannel', messageControllers.onCreateChannel.bind(socket));
 }
 
 IoServer.prototype.init = function () {

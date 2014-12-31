@@ -21,6 +21,9 @@ utils = {
         var logger;
         if (!parent) {
             logger = bunyan.createLogger({ name: name });
+            if (!utils.isProdMode()) {
+                logger.level(bunyan.DEBUG);
+            }
         }
         else {
             logger = parent;

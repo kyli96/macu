@@ -22,10 +22,10 @@ util.inherits(DomainStrategy, Strategy.Strategy);
 DomainStrategy.prototype.authenticate = function (req, options) {
     options = options || {};
     var domain = lookup(req.body, 'domain') || lookup(req.query, 'domain');
-    var username = lookup(req.body, 'username') || lookup(req.query, 'username');
+    var email = lookup(req.body, 'email') || lookup(req.query, 'email');
     var password = lookup(req.body, 'password') || lookup(req.query, 'password');
     
-    if (!domain || !username || !password) {
+    if (!domain || !email || !password) {
         return this.fail({ message: options.badRequestMessage || 'Missing credentials' }, 400);
     }
     
@@ -39,9 +39,9 @@ DomainStrategy.prototype.authenticate = function (req, options) {
     
     try {
         if (self._passReqToCallback) {
-            this._verify(req, domain, username, password, verified);
+            this._verify(req, domain, email, password, verified);
         } else {
-            this._verify(domain, username, password, verified);
+            this._verify(domain, email, password, verified);
         }
     } catch (ex) {
         return self.error(ex);
@@ -61,8 +61,8 @@ passport.deserializeUser(function (id, fn) {
     });
 });
 
-passport.use(new DomainStrategy(function(domain, username, password, fn) {
-    User.findByCredentials(domain, username, password).done(function (user) {
+passport.use(new DomainStrategy(function(domain, email, password, fn) {
+    User.findByCredentials(domain, email, password).done(function (user) {
         if (!user) {
             fn(null, false, { message: 'The info you provided does not match our record. Please try again.' });
             return;

@@ -6,7 +6,6 @@ function Message(values) {
     this._id = values._id || null;
     this.t_id = values.t_id || null;
     this.user_id = values.user_id || null;
-    this.username = values.username || '';
     this.name = values.name || '';
     this.msg = values.msg || '';
     this.ts = values.ts || Date.now();
@@ -16,7 +15,7 @@ function Message(values) {
     if (this.user_id && !ObjectID.prototype.isPrototypeOf(this.user_id)) {
         this.user_id = new ObjectID(this.user_id);
     }
-    this._dbfields = ['t_id', 'user_id', 'username', 'name', 'msg', 'ts'];
+    this._dbfields = ['t_id', 'user_id', 'name', 'msg', 'ts'];
 }
 
 Message.collectionName = 'messages';

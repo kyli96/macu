@@ -32,6 +32,7 @@ controllers = {
         //}
         User.findById(req.params.id)
             .then(function (user) {
+                req.log.debug(user, 'getting channels for user.');
                 return user.getChannels();
             }).done(function(data) {
                 res.status(200).send(data);
@@ -47,9 +48,9 @@ controllers = {
         var channel = new Channel.Channel(req.body);
         channel.save().then(function (obj) {
             req.log.info('channel ' + obj._id + ' created.');
-            if (channel.access == "public") {
-                return Users.subscribeChannelForDomain(obj.domain, obj._id);
-            }
+            //if (channel.access == "public") {
+            //    return Users.subscribeChannelForDomain(obj.domain, obj._id);
+            //}
             return new Promise(function (resolve) { resolve(); })
         }).done(function(r) {
             MessageController.onNewChannel(channel);
