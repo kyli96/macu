@@ -40,6 +40,14 @@ CollectionBase.getLogger = function () {
     return logger;
 }
 
+CollectionBase.count = function (model_class, query, options) {
+    var col = new CollectionBase(model_class.collectionName);
+    return col.getCollection()
+        .then(function (collection) {
+            return collection.countAsync(query, options);
+        });
+}
+
 CollectionBase.find = function (model_class, filter, modifiers, orders) {
     var col = new CollectionBase(model_class.collectionName);
     return col.getCollection()

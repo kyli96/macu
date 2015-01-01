@@ -16,8 +16,8 @@ function Channel(values) {
     this.domain = values.domain || '';
     this.includeAll = values.includeAll || false;
     this.owner = values.owner || null;
-    if (ObjectID.prototype.isPrototypeOf(this.owner)) {
-        this.owner = this.owner.toHexString();
+    if (!ObjectID.prototype.isPrototypeOf(this.owner)) {
+        this.owner = new ObjectID(this.owner);
     }
     this._dbfields = ['name', 'access', 'description', 'domain', 'includeAll', 'owner'];
 }
@@ -35,10 +35,16 @@ Channels = {
                 ids[i] = new ObjectID(ids[i]);
             }
         }
-        return CollectionBase.find(Channel, { _id: { $in: ids } }, {}, null);
+        return CollectionBase.find(Channel, { _id: { $in: ids } }, {});
     },
     findByDomain: function (domain) {
-        return CollectionBase.find(Channel, { domain: domain, access: 'public' }, {}, null);
+        return CollectionBase.find(Channel, { domain: domain, access: 'public' }, {});
+    },
+    countByDomain: function (domain) {
+        return CollectionBase.count(Channel, { domain: domain, access: 'public' });
+    },
+    find: function (filter, modifier, order) {
+        return CollectionBase.find(Channel, filter, modifier, order);
     }
 }
 

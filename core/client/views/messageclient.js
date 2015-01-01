@@ -75,6 +75,8 @@
                     currentCid={this.state.currentCid}
                     onCurrentCidChange={this.onCurrentCidChange}
                     onClickCreateChannel={this.props.onClickCreateChannel}
+                    domain={this.props.user.domain}
+                    API={this.props.API}
                 />
               </div>
               <div id="messages_container">

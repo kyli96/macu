@@ -49,10 +49,18 @@ User.prototype.subscribeChannel = function(channel_id) {
 }
 
 User.prototype.getChannels = function () {
+    var self = this;
+    var query = {
+        $or: [
+            { owner: self._id }, 
+            { _id: { $in: self.subscribeChannel } }
+        ]
+    };
+    return Channels.find(query, {}, null);
     //if (!this.subscribed || this.subscribed.length == 0) {
     //    return new Promise(function(resolve) {resolve([]);});
     //}
-    return Channels.findByDomain(this.domain);
+    //return Channels.findByDomain(this.domain);
 }
 
 Users = {

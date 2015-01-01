@@ -36,7 +36,9 @@ var Mf = {
             onRefreshMsgs: Mf.onRefreshMsgs,
             onClickCreateChannel: Mf.onClickCreateChannel,
             onRefreshChannels: Mf.onRefreshChannels,
-            updateChannelHeader: Mf.updateChannelHeader
+            updateChannelHeader: Mf.updateChannelHeader,
+            user: M.user,
+            API: API
         };
         M.messageClient = React.render(React.createElement(MessageClient, client_props), 
             $('#client_body')[0]);

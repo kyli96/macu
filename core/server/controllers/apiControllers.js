@@ -17,8 +17,19 @@ controllers = {
     },
     getChannels: function (req, res) {
         var domain = req.params.domain;
-        Channel.Channels.findByDomain(domain).done(function (results) {
-            res.send(results);
+        var fn = Channel.Channels;
+        if (req.query.countOnly) {
+            fn = fn.countByDomain;
+        }
+        else {
+            fn = fn.findByDomain;
+        }
+        fn(domain).done(function (results) {
+            var r = results;
+            if (req.query.countOnly) {
+                r = { count: r };
+            }
+            res.send(r);
         }, function(err) {
             controllers.respondError(res, err);
         });
