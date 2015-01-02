@@ -1,3 +1,5 @@
+var React = require('react');
+
 var ChannelHeader = React.createClass({
 	getInitialState: function() {
 		return {channel: {name: ''}};
@@ -21,3 +23,5 @@ var ChannelHeader = React.createClass({
 		);
 	}
 });
+
+module.exports = ChannelHeader;

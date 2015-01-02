@@ -1,4 +1,11 @@
-﻿var M = {
+﻿var API = require('./api'),
+    Scrollers = require('./scroller'),
+    React = require('react'),
+    MessageClient = require('../views/messageclient'),
+    ChannelHeader = require('../views/channelheader'),
+    CreateChannel = require('../views/createchannel');
+
+var M = {
     currentCid: null,
     user: null,
     messageClient: null,
@@ -9,7 +16,10 @@ var Mf = {
         Mf.socket = io();
         Mf.socket.on('profile', function (obj) {
             M.user = obj;
-        })
+            Mf.renderHeader();
+            Mf.renderMessageClient();
+            Wf.init();
+       })
         Mf.socket.on('sendMsg', Mf.onNewMessage);
         Mf.socket.on('newChannel', Mf.onNewChannel);
         
@@ -148,3 +158,8 @@ var Wf = {
     }
 }
 
+module.exports = {
+    M: M,
+    Mf: Mf,
+    Wf: Wf
+}

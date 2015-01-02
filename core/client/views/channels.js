@@ -1,4 +1,6 @@
-﻿var ChannelsCol = React.createClass({
+﻿var React = require('react');
+
+var ChannelsCol = React.createClass({
     getInitialState: function() {
         var domainChannelCount = 0;
         if (this.props.domainChannelCount) {
@@ -67,3 +69,5 @@
         );
     }
 });
+
+module.exports = ChannelsCol;

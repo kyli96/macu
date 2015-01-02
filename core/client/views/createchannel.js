@@ -1,3 +1,5 @@
+var React = require('react');
+
 var CreateChannel = React.createClass({
 	_onClickSave: function(event) {
 		if (this.props.onClickSave) {
@@ -44,3 +46,5 @@ var CreateChannel = React.createClass({
 		);
 	}
 });
+
+module.exports = CreateChannel;

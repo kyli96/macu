@@ -69,3 +69,6 @@ MacuScroller.prototype.updateHandlePosition = function () {
 MacuScroller.prototype.gotoBottom = function () {
     this.scroll_div.scrollTop(this.content_height - this.scroll_div.height());
 }
+
+module.exports = Scrollers;
+module.exports.MacuScroller = MacuScroller;

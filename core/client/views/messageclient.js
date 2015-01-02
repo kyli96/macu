@@ -1,4 +1,8 @@
-﻿var MessageClient = React.createClass({
+﻿var React = require('react'),
+    ChannelsCol = require('./channels'),
+    MessageList = require('./messages');
+
+var MessageClient = React.createClass({
     getInitialState: function() {
         this.msgs = [];
         this.channels = [];
@@ -90,3 +94,5 @@
         );
     }
 });
+
+module.exports = MessageClient;

@@ -12,31 +12,7 @@
   <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
   <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-  <script src="http://fb.me/react-0.12.2.js"></script>
 
-  {{#ifInDevMode}}
-  <script src="/js/build/channels.js"></script>
-  <script src="/js/build/messages.js"></script>
-  <script src="/js/build/messageclient.js"></script>
-  <script src="/js/build/createchannel.js"></script>
-  <script src="/js/build/channelheader.js"></script>
-  <script src="/js/api.js"></script>
-  <script src="/js/scroller.js"></script>
-  <script src="/js/messages.js"></script>
-  {{/ifInDevMode}}
-
-  <script type="text/javascript">
-    if (!M.user) {
-      M.user = {
-        _id: "{{user._id}}",
-        name: "{{user.name}}",
-        domain: "{{user.domain}}"
-      };
-    }
-    Mf.renderHeader();
-    Mf.renderMessageClient();
-    Mf.init();
-    Wf.init();
-  </script>
+  <script src="/js/build/bundle.js"></script>
 </body>
 </html>

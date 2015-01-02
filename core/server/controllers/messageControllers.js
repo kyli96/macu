@@ -18,6 +18,7 @@ messageControllers = {
             connected_users['' + user.domain] = { connections: {} };
         }
         connected_users['' + user.domain].connections["" + socket.id] = { socket: socket, user_id: user._id };
+        socket.emit('profile', user);
         user.getChannels().done(function (data) {
             for (var i = 0; i < data.length; i++) {
                 log.debug('joining channel ' + data[i]._id);
@@ -26,7 +27,6 @@ messageControllers = {
         }, function (err) {
             log.error('Unable to get channels for user ' + user.email);
         });
-        socket.emit('profile', user);
     },
     onDisconnection: function (socket, user) {
         var log = socket.request.log;

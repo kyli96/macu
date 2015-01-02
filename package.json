@@ -2,6 +2,11 @@
   "name": "macu",
   "version": "0.0.1",
   "description": "Core Macu",
+  "main": "./core/index",
+  "scripts": {
+    "start": "node server | bunyan",
+    "watch": "watchify ./core/client/js/main.js -o ./core/client/js/build/bundle.js -v -d"
+  },
   "dependencies": {
     "bluebird": "^2.4.2",
     "body-parser": "^1.10.0",
@@ -17,7 +22,21 @@
     "passport-local": "^1.0.0",
     "passport-strategy": "^1.0.0",
     "passport.socketio": "^3.4.1",
+    "react": "^0.12.2",
     "request": "^2.51.0",
     "socket.io": "^1.2.1"
+  },
+  "devDependencies": {
+    "browserify": "^6.2.0",
+    "envify": "^3.0.0",
+    "reactify": "^0.15.2",
+    "uglify-js": "~2.4.15",
+    "watchify": "^2.1.1"
+  },
+  "browserify": {
+    "transform": [
+      "reactify",
+      "envify"
+    ]
   }
 }

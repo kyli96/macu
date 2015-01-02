@@ -27,3 +27,5 @@ var API = {
         API.get(url, fn);
     }
 };
+
+module.exports = API;

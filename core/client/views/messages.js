@@ -1,4 +1,6 @@
-﻿var last_ts = null;
+﻿var React = require('react');
+
+var last_ts = null;
 
 var Message = React.createClass( {
     render: function () {
@@ -57,3 +59,5 @@ var MessageList = React.createClass({
         );
     }
 });
+
+module.exports = MessageList;
