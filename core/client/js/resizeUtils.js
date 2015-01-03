@@ -1,4 +1,4 @@
-var Scrollers = require('../js/scroller');
+var Scrollers = require('./scroller');
 
 var Wf = {
     init: function () {

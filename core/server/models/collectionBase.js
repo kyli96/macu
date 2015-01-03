@@ -1,6 +1,7 @@
 ﻿var ObjectID = require('mongodb').ObjectID,
     Promise = require('bluebird'),
     Utils = require('../utils'),
+    config = require('config'),
     MongoDB,
     MongoClient,
     MONGO_URL,
@@ -13,12 +14,7 @@ Promise.promisifyAll(MongoDB.Cursor.prototype);
 
 logger = Utils.createLogger('CollectionBase');
 
-if (Utils.isProdMode()) {
-    MONGO_URL = 'mongodb://localhost:27017/macu';
-}
-else {
-    MONGO_URL = 'mongodb://localhost:27017/macu';
-}
+MONGO_URL = config.get('Core.mongoConfig').url;
 
 function CollectionBase(collectionName) {
     this.collectionName = collectionName;

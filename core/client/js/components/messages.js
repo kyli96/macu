@@ -1,7 +1,7 @@
 ﻿var React = require('react');
-var MessageStore = require('../js/stores/MessageStore');
-var resizeUtils = require('../js/resizeUtils');
-var Scrollers = require('../js/scroller');
+var MessageStore = require('../stores/MessageStore');
+var resizeUtils = require('../resizeUtils');
+var Scrollers = require('../scroller');
 
 function getStateFromStores() {
     return {

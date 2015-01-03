@@ -1,5 +1,5 @@
 var React = require('react');
-var ChannelStore = require('../js/stores/ChannelStore');
+var ChannelStore = require('../stores/ChannelStore');
 
 function getStateFromStores() {
     return {

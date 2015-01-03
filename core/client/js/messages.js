@@ -1,8 +1,8 @@
 var API = require('./api'),
     React = require('react'),
-    MessageClient = require('../views/messageclient'),
-    ChannelHeader = require('../views/channelheader'),
-    CreateChannel = require('../views/createchannel');
+    MessageClient = require('./components/messageclient'),
+    ChannelHeader = require('./components/channelheader'),
+    CreateChannel = require('./components/createchannel');
 var ServerActionCreators = require('./actions/ServerActionCreators');
 var CoreAppDispatcher = require('./dispatcher/CoreAppDispatcher');
 var ChannelStore = require('./stores/ChannelStore');
