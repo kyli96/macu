@@ -30,7 +30,14 @@ Message.prototype.save = function () {
         return Promise.reject(new Error('missing required field(s)'));
     }
     var col = new CollectionBase(Message.collectionName);
-    return col.insertOne(self);
+    return col.insertOne(self)
+    .then(function (r) {
+        if (r.result.ok != 1 || r.insertedCount != 1 || !r.ops || !r.ops[0] || !r.ops[0]._id) {
+            throw new Error('failed inserting document');
+        }
+        this._id = r.ops[0]._id;
+        return this;
+    }.bind(this));
 }
 
 module.exports = Message;

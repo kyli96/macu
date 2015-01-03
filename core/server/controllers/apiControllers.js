@@ -12,7 +12,7 @@ controllers = {
         User.findById(req.params.id).done(function (results) {
             res.send(results);
         }, function (err) {
-            controllers.respondError(res, err);
+            controllers.respondError(req, res, err);
         });
     },
     getChannels: function (req, res) {
@@ -31,7 +31,7 @@ controllers = {
             }
             res.send(r);
         }, function(err) {
-            controllers.respondError(res, err);
+            controllers.respondError(req, res, err);
         });
     },
     getUserChannels: function (req, res) {
@@ -48,12 +48,12 @@ controllers = {
             }).done(function(data) {
                 res.status(200).send(data);
             }, function(err) {
-                controllers.respondError(res, err);
+                controllers.respondError(req, res, err);
             });
     },
     createChannel: function (req, res) {
         if (!req.body.name) {
-            controllers.respondError(res, 'missing channel name');
+            controllers.respondError(req, res, 'missing channel name');
             return;
         }
         var channel = new Channel.Channel(req.body);
@@ -67,7 +67,7 @@ controllers = {
             MessageController.onNewChannel(channel);
             res.status(200).send(channel);
         }, function(err) {
-            controllers.respondError(res, err);
+            controllers.respondError(req, res, err);
         });
     },
     subscribeChannel: function (req, res) {
@@ -80,7 +80,7 @@ controllers = {
         var user = new User({_id:req.params.id});
         var cid = req.body.channel_id;
         if (!cid) {
-            controllers.respondError(res, 'missing channel_id');
+            controllers.respondError(req, res, 'missing channel_id');
             return;
         }
         if (!User.prototype.isPrototypeOf(user)) {
@@ -89,26 +89,26 @@ controllers = {
         user.subscribeChannel(cid).done(function(r) {
             res.status(200).send(r);
         }, function(err) {
-            controllers.respondError(res, err);
+            controllers.respondError(req, res, err);
         });
     },
     getChannelHistory: function (req, res) {
         var id = req.params.id;
         var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
         if (!hexCheck.test(id)) {
-            controllers.respondError(res, 'invalid id');
+            controllers.respondError(req, res, 'invalid id');
             return;
         }
         var channel = new Channel.Channel({_id:id});
         channel.getHistory().done(function (r) {
             res.send(r);
         }, function(err) {
-            controllers.respondError(res, err);
+            controllers.respondError(req, res, err);
         });
     },
     postMessage: function (req, res) {
         if (!req.body.t_id) {
-            controllers.respondError(res, 'missing target id');
+            controllers.respondError(req, res, 'missing target id');
             return;
         }
         var msg = new Message(req.body);
@@ -116,18 +116,18 @@ controllers = {
         MessageController.processNewMessage(msg, req.log).done(function () {
             res.status(200).send({ok: true, ts: ts, t_id: msg.t_id});
         }, function (err) {
-            controllers.respondError(res, err);
+            controllers.respondError(req, res, err);
         });
     },
     getHook: function (req, res) {
         if (!req.params.hook_id) {
-            controllers.respondError(res, 'missing hook id');
+            controllers.respondError(req, res, 'missing hook id');
             return;
         }
         Hook.findById(req.params.hook_id).done(function (obj) { 
             res.status(200).send(obj.getView());
         }, function(err) {
-            controllers.respondError(res, err);
+            controllers.respondError(req, res, err);
         });
     },
     createHook: function (req, res) {
@@ -143,23 +143,24 @@ controllers = {
             }
             res.status(status).send({ ok: true, ts: r.updated_at, url: '/api/channel/' + req.params.channel_id + '/hook/' + r._id });
         }).catch(function (err) {
-            controllers.respondError(res, err);
+            controllers.respondError(req, res, err);
         });
     },
-    respondError: function (res, err, status) {
-        req.log.info(err);
+    respondError: function (req, res, err, status) {
         var res_status = 500;
         if (status) {
             res_status = status;
         }
-        else if (err.indexOf('missing ') === 0
-            || err.indexOf('invalid ') === 0) {
+        else if (err.message.indexOf('missing ') === 0
+            || err.message.indexOf('invalid ') === 0) {
             res_status = 400;
         }
-        else if (err.indexOf('not found') > 0) {
+        else if (err.message.indexOf('not found') > 0) {
             res_status = 404;
         }
         res.status(res_status).send({ ok: false, error: err });
+        req.log.error(err.message);
+        req.log.debug({ req: req, res: res, err: err }, err.message);
     }
 }
 

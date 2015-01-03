@@ -1,19 +1,28 @@
 ﻿var React = require('react');
+var MessageStore = require('../js/stores/MessageStore');
+var resizeUtils = require('../js/resizeUtils');
+var Scrollers = require('../js/scroller');
+
+function getStateFromStores() {
+    return {
+        msgs: MessageStore.getCurrentChannelMessages()
+    };
+}
 
 var last_ts = null;
 
 var Message = React.createClass( {
     render: function () {
         var showDayDivider = function(ts) {
-            var show = false;
+            var show = '';
             var d = new Date(ts);
             if (!last_ts) {
-                show = true;
+                show = d.toDateString();
             }
             else {
                 var t = new Date(last_ts);
                 if (t.toDateString() != d.toDateString()) {
-                    show = true;
+                    show = d.toDateString();
                 }
             }
             last_ts = ts;
@@ -22,7 +31,7 @@ var Message = React.createClass( {
                 return (
                     <div className="day_divider" id={div_id}>
                       <hr role="separator" aria-hidden="true" />
-                      <div className="day_divider_label">{d.toDateString()}</div>
+                      <div className="day_divider_label">{show}</div>
                     </div>
                 );
             }
@@ -50,12 +59,28 @@ var Message = React.createClass( {
 });
 
 var MessageList = React.createClass({
+    getInitialState: function() {
+        return getStateFromStores();
+    },
+    componentDidMount: function() {
+        MessageStore.addChangeListener(this._onChange);
+    },
+    _onChange: function() {
+        this.setState(getStateFromStores(), function() {
+            resizeUtils.resizeMsgFiller();
+            if (!Scrollers.scrollPanes['messages_scroll_div']) {
+                Scrollers.init('messages_scroll_div');
+            } else {
+                Scrollers.scrollPanes['messages_scroll_div'].update();
+            }
+        });
+    },
     render: function () {
         var renderMessage = function (message) {
             return <Message key={message.ts} msg={message} />;
         };
         return (
-            <div id="msgs_div">{this.props.msgs.map(renderMessage)}</div>
+            <div id="msgs_div">{this.state.msgs.map(renderMessage)}</div>
         );
     }
 });

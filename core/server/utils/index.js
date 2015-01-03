@@ -17,10 +17,10 @@ utils = {
         }
         return null;
     },
-    createLogger: function (name, parent) {
+    createLogger: function (name, parent, obj) {
         var logger;
         if (!parent) {
-            logger = bunyan.createLogger({ name: name });
+            logger = bunyan.createLogger({ name: name, serializers: bunyan.stdSerializers });
             if (!utils.isProdMode()) {
                 logger.level(bunyan.DEBUG);
             }
@@ -30,7 +30,14 @@ utils = {
         }
         switch (name) {
             case 'req':
-                logger = parent.child({ reqId: uuid.v1() });
+                var info = {};
+                info.reqId = uuid.v1();
+                if (obj) {
+                    info.url = obj.url;
+                    info.method = obj.method;
+                }
+                logger = parent.child(info);
+                break;
         }
         return logger;
     }

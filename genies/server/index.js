@@ -24,7 +24,7 @@ function init(options){
     var app = express();
     app.log = Utils.createLogger('geniesApp');
     app.use(function (req, res, next) {
-        req.log = Utils.createLogger('req', app.log);
+        req.log = Utils.createLogger('req', app.log, req);
         next();
     });
     app.use(bodyParser.json());

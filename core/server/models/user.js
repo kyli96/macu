@@ -53,7 +53,7 @@ User.prototype.getChannels = function () {
     var query = {
         $or: [
             { owner: self._id }, 
-            { _id: { $in: self.subscribeChannel } }
+            { _id: { $in: self.subscribed } }
         ]
     };
     return Channels.find(query, {}, null);

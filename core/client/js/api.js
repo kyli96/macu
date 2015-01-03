@@ -1,3 +1,5 @@
+var UserStore = require('./stores/UserStore');
+
 var API = {
     get: function(url, fn) {
         $.ajax({
@@ -25,6 +27,12 @@ var API = {
             url += '?countOnly=1';
         }
         API.get(url, fn);
+    },
+    getMsgs: function (cid, fn) {
+        API.get('/channel/'+cid+'/history', fn);
+    },
+    getChannels: function (fn) {
+        API.get('/user/'+UserStore.getData()._id+'/channels', fn);
     }
 };
 

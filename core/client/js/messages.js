@@ -1,56 +1,73 @@
-﻿var API = require('./api'),
-    Scrollers = require('./scroller'),
+var API = require('./api'),
     React = require('react'),
     MessageClient = require('../views/messageclient'),
     ChannelHeader = require('../views/channelheader'),
     CreateChannel = require('../views/createchannel');
+var ServerActionCreators = require('./actions/ServerActionCreators');
+var CoreAppDispatcher = require('./dispatcher/CoreAppDispatcher');
+var ChannelStore = require('./stores/ChannelStore');
+var Constants = require('./constants/CoreConstants');
+var UserStore = require('./stores/UserStore');
+var ActionTypes = Constants.ActionTypes;
+var ResizeUtils = require('./resizeUtils');
 
-var M = {
-    currentCid: null,
-    user: null,
-    messageClient: null,
-    header: null
-};
 var Mf = {
     init: function () {
         Mf.socket = io();
         Mf.socket.on('profile', function (obj) {
-            M.user = obj;
+            ServerActionCreators.receiveProfile(obj);
+
+            API.getChannels(function(data){
+                ServerActionCreators.receiveChannels(data);
+
+                Mf.initMessageInput();
+            });
+            API.getDomainChannels(obj.domain, true, function(data) {
+                if (!data || !data.count) {
+                    return;
+                }
+                ServerActionCreators.receiveDomainChannelCount(data);
+            });
+        
             Mf.renderHeader();
             Mf.renderMessageClient();
-            Wf.init();
-       })
-        Mf.socket.on('sendMsg', Mf.onNewMessage);
-        Mf.socket.on('newChannel', Mf.onNewChannel);
-        
+            ResizeUtils.init();
+        })
+        Mf.socket.on('sendMsg', ServerActionCreators.receiveNewMessage);
+        Mf.socket.on('newChannel', ServerActionCreators.receiveNewChannel);
+
+        CoreAppDispatcher.register(function(payload){
+            var action = payload.action;
+
+            switch(action.type) {
+                case ActionTypes.RECEIVE_CHANNELS:
+                    CoreAppDispatcher.waitFor([ChannelStore.dispatchToken]);
+                    break;
+                case ActionTypes.CLICK_CREATE_CHANNEL:
+                    Mf.onClickCreateChannel();
+                    break;
+                default:
+                    // no-op
+            }
+        });
+    },
+    initMessageInput: function() {
         $('form').submit(function () {
             var msg = $('#message-input').val();
-            Mf.sendMsg('C' + M.messageClient.state.currentCid, msg);
+            Mf.sendMsg('C' + ChannelStore.getCurrentID(), msg);
             $('#message-input').val('');
             return false;
         });
     },
     renderHeader: function () {
         var header_props = {
-            domain: { name: M.user.domain }
+            domain: { name: UserStore.getData().domain }
         };
-        M.header = React.render(React.createElement(ChannelHeader, header_props), $('#header')[0]);
+        React.render(React.createElement(ChannelHeader, header_props),
+            $('#header')[0]);
     },
     renderMessageClient: function () {
-        var client_props = {
-            // initState: {
-            //     currentCid: M.currentCid,
-            // }
-            getChannels: Mf.getChannels,
-            getMsgs: Mf.getMsgs,
-            onRefreshMsgs: Mf.onRefreshMsgs,
-            onClickCreateChannel: Mf.onClickCreateChannel,
-            onRefreshChannels: Mf.onRefreshChannels,
-            updateChannelHeader: Mf.updateChannelHeader,
-            user: M.user,
-            API: API
-        };
-        M.messageClient = React.render(React.createElement(MessageClient, client_props), 
+        React.render(React.createElement(MessageClient, null), 
             $('#client_body')[0]);
     },
     sendMsg: function (t_id, msg) {
@@ -59,26 +76,13 @@ var Mf = {
         }
         var msg_obj = {
             t_id: t_id,
-            user_id: M.user._id,
-            name: M.user.name, 
+            user_id: UserStore.getData()._id,
+            name: UserStore.getData().name, 
             msg: msg, 
             ts: Date.now()
         }
         Mf.socket.emit('sendMsg', msg_obj);
-        M.messageClient.onNewMessage(msg_obj);
-        return true;
-    },
-    onNewMessage: function (obj) {
-        M.messageClient.onNewMessage(obj);
-    },
-    onNewChannel: function (channel) {
-        if (channel.domain == M.user.domain) {
-            M.messageClient.onNewChannel(channel);
-        }
-    },
-    updateChannelHeader: function (channel) {
-        M.currentCid = channel._id;
-        M.header.updateChannel(channel);
+        ServerActionCreators.receiveNewMessage(msg_obj);
     },
     onClickCreateChannel: function () {
         if ($('#create_channel_modal').length === 0) {
@@ -97,69 +101,13 @@ var Mf = {
     },
     createChannel: function (channel) {
         channel.access = "public";
-        channel.domain = M.user.domain;
-        channel.owner = M.user._id;
+        channel.domain = UserStore.getData().domain;
+        channel.owner = UserStore.getData()._id;
         Mf.socket.emit('createChannel', channel);
         if ($('#create_channel_modal').length) {
             $('#create_channel_modal').modal('hide');
         }
-    },
-    getChannels: function (fn) {
-        API.get('/user/'+M.user._id+'/channels', fn);
-    },
-    getMsgs: function (t_id, fn) {
-        API.get('/channel/'+t_id+'/history', fn);
-    },
-    onRefreshChannels: function() {
-        Wf.resizeChannelsCol();
-    },
-    onRefreshMsgs: function () {
-        Wf.resizeMsgFiller();
-        if (!Scrollers.scrollPanes['messages_scroll_div']) {
-            Scrollers.init('messages_scroll_div');
-        } else {
-            Scrollers.scrollPanes['messages_scroll_div'].update();
-        }
     }
-}
+};
 
-var Wf = {
-    init: function () {
-        $(window).on('resize', function () {
-            Wf.resizeChannelsCol();
-            Wf.resizeMessageScrollDiv();
-            Wf.resizeMsgFiller();
-            if (Scrollers.scrollPanes['messages_scroll_div']) {
-                Scrollers.scrollPanes['messages_scroll_div'].update();
-            }
-        }).trigger('resize');
-    },
-    resizeChannelsCol: function () {
-        $('#channels_col').height($(window).height() - $('#header').height());
-    },
-    resizeMessageScrollDiv: function () {
-        var scroll_div = $('#messages_scroll_div');
-        var msgs_div = $('#msgs_div');
-        var scroll_div_height = $(window).height() - $('#footer').height() - $('#header').height();
-        scroll_div.height(scroll_div_height);
-        scroll_div.width($(window).width() - $('#channels_col').width());
-    },
-    resizeMsgFiller: function () {
-        var msgs_div = $('#msgs_div');
-        var msgs_height = $('#message_front').height() + msgs_div.height() + parseInt(msgs_div.css('padding-top')) + parseInt(msgs_div.css('padding-bottom'));
-        var scroll_div_height = $('#messages_scroll_div').height();
-        var filler = scroll_div_height - msgs_height;
-        if (filler > 0) {
-            $('#message_filler').height(filler);
-        }
-        else {
-            $('#message_filler').height(0);
-        }
-    }
-}
-
-module.exports = {
-    M: M,
-    Mf: Mf,
-    Wf: Wf
-}
+module.exports = Mf;

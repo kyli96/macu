@@ -50,9 +50,11 @@ messageControllers = {
     onNewChannel: function (channel) {
         if (channel.access == 'public' && connected_users['' + channel.domain] && connected_users['' + channel.domain].connections) {
             var connections = connected_users['' + channel.domain].connections;
-            for (socket_id in connections) {
-                if (connections[socket_id].socket) {
-                    connections[socket_id].socket.join(channel._id);
+            for (var socket_id in connections) {
+                if (connections[socket_id] && connections[socket_id].socket) {
+                    if (('' + connections[socket_id].user_id) == ('' + channel.owner)) {
+                        connections[socket_id].socket.join(channel._id);
+                    }
                     connections[socket_id].socket.emit('newChannel', channel);
                 }
             }
@@ -75,11 +77,12 @@ messageControllers = {
         });
     },
     processNewMessage: function (msg, logger, socket){
+        logger.debug(msg, 'processing new message');
         var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
         if ((msg.t_id.substring(0,1) != 'C')
             || !hexCheck.test(msg.t_id.substring(1))) {
             logger.error('invalid target id: ' + msg.t_id);
-            return;
+            return Promise.reject(new Error('invalid target id: ' + msg.t_id));
         }
         var getTarget;
         if (msg.t_id.substring(0, 1) == 'C') {
@@ -90,14 +93,15 @@ messageControllers = {
                     return Promise.reject(new Error('target not found'));
                 }
                 return target.recordMsg(msg);
-            }).then(function () {
+            }).then(function (doc) {
+                logger.debug(doc, 'broadcast new message');
                 if (!socket) {
-                    io.to(msg.t_id.substring(1)).emit('sendMsg', msg);
+                    io.to(doc.t_id.substring(1)).emit('sendMsg', doc);
                 }
                 else {
-                    socket.broadcast.to(msg.t_id.substring(1)).emit('sendMsg', msg);
+                    socket.broadcast.to(doc.t_id.substring(1)).emit('sendMsg', doc);
                 }
-                messageControllers.processHooks(msg, ['mention'], logger);
+                messageControllers.processHooks(doc, ['mention'], logger);
             });
     },
     processHooks: function (msg, events, logger) {

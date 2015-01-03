@@ -1,3 +1,3 @@
-var Mf = require('./messages').Mf;
+var Messenger = require('./messages');
 
-Mf.init();
+Messenger.init();

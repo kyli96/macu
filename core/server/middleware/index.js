@@ -18,7 +18,7 @@ init = function (coreApp, apiApp){
     authStragegies = authStrategies;
     
     coreApp.use(function (req, res, next) {
-        req.log = Utils.createLogger('req', coreApp.log);
+        req.log = Utils.createLogger('req', coreApp.log, req);
         next();
     });
     coreApp.use(cookieParser());
@@ -55,7 +55,7 @@ init = function (coreApp, apiApp){
     // coreApp.use('/api', authentication.authorizeExpress());
     
     apiApp.use(function (req, res, next) {
-        req.log = Utils.createLogger('req', apiApp.log);
+        req.log = Utils.createLogger('req', apiApp.log, req);
         next();
     });
     apiApp.use(routes.api());
