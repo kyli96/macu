@@ -16,6 +16,12 @@ module.exports = {
             count: data.count
         });
     },
+    receiveDomainChannels: function(data) {
+        CoreAppDispatcher.handleServerAction({
+            type: ActionTypes.RECEIVE_DOMAIN_CHANNELS,
+            channels: data
+        });
+    },
     receiveNewMessage: function(data) {
         CoreAppDispatcher.handleServerAction({
             type: ActionTypes.NEW_MESSAGE,
@@ -32,6 +38,12 @@ module.exports = {
         CoreAppDispatcher.handleServerAction({
             type: ActionTypes.RECEIVE_PROFILE,
             user: data
+        });
+    },
+    joinedChannel: function(data) {
+        CoreAppDispatcher.handleServerAction({
+            type: ActionTypes.JOINED_CHANNEL,
+            channel: data
         });
     }
 };

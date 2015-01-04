@@ -33,6 +33,9 @@ var ChannelsCol = React.createClass({
     _onClickCreateChannel: function() {
         ChannelActionCreators.clickCreateChannel();
     },
+    _onClickMoreChannels: function () {
+        ChannelActionCreators.clickMoreChannels();
+    },
     render: function () {
         var createItem = function (channel) {
             var classname = 'channel';
@@ -49,7 +52,7 @@ var ChannelsCol = React.createClass({
             var more = this.state.domainChannelCount - this.state.channels.length;
             if (more > 0) {
                 return (
-                    <a className="join_channel list_more">+{more} more</a>
+                    <a className="join_channel list_more" onClick={this._onClickMoreChannels}>+{more} more</a>
                     );
             }
             return '';

@@ -1,4 +1,5 @@
 var UserStore = require('./stores/UserStore');
+var ServerActionCreators = require('./actions/ServerActionCreators');
 
 var API = {
     get: function(url, fn) {
@@ -11,6 +12,15 @@ var API = {
     post: function(url, data, fn) {
         $.ajax({
             type: 'POST',
+            url: '/api' + url,
+            data: data
+        }).done(function(r) {
+            fn(r);
+        });
+    },
+    put: function(url, data, fn) {
+        $.ajax({
+            type: 'PUT',
             url: '/api' + url,
             data: data
         }).done(function(r) {
@@ -33,6 +43,25 @@ var API = {
     },
     getChannels: function (fn) {
         API.get('/user/'+UserStore.getData()._id+'/channels', fn);
+    },
+    getAvailableChannels: function (filter, fn) {
+        API.get('/user/' + UserStore.getData()._id + '/channels?nonSubscribedOnly=1', function (data) {
+            ServerActionCreators.receiveDomainChannels(data);
+            if (fn) {
+                fn(data);
+            }
+        });
+    },
+    subscribeChannel: function (channel_id, fn) {
+        var data = {
+            action: 'subscribeChannel',
+            channel_id: channel_id
+        };
+        API.put('/user/' + UserStore.getData()._id, data, function (result) {
+            if (result && result.ok && result.channel) {
+                ServerActionCreators.joinedChannel(result.channel);
+            }
+        });
     }
 };
 

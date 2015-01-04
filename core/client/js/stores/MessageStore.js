@@ -71,6 +71,10 @@ MessageStore.dispatchToken = CoreAppDispatcher.register(function(payload){
             MessageStore.addNewMessage(action.message);
             MessageStore.emitChange();
             break;
+        case ActionTypes.JOINED_CHANNEL:
+            CoreAppDispatcher.waitFor([ChannelStore.dispatchToken]);
+            MessageStore.loadChannelMessages(action.channel._id);
+            break;
         default:
             // no-op
     }

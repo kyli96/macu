@@ -2,6 +2,9 @@
     "Core": {
         "mongoConfig": {
             "url": "mongodb://localhost:27017/macu"
+        },
+        "cookie": { 
+            "secret":  "little secret"
         }
     }
 }

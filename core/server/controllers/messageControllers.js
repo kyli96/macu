@@ -76,6 +76,18 @@ messageControllers = {
             log.error(err, 'failed creating channel');
         });
     },
+    joinUserToChannel: function (user_id, channel) {
+        if (connected_users['' + channel.domain] && connected_users['' + channel.domain].connections) {
+            var connections = connected_users['' + channel.domain].connections;
+            for (var socket_id in connections) {
+                if (connections[socket_id] 
+                    && connections[socket_id].socket
+                    && ('' + connections[socket_id].user_id) == ('' + user_id)) {
+                    connections[socket_id].socket.join(channel._id);
+                }
+            }
+        }
+    },
     processNewMessage: function (msg, logger, socket){
         logger.debug(msg, 'processing new message');
         var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');

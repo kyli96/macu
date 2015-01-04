@@ -35,21 +35,18 @@ controllers = {
         });
     },
     getUserChannels: function (req, res) {
-        //var user = req.user;
-        //if (!user) {
-        //    req.log.info('Unable to get user from req obj');
-        //    res.status(401).send('Unable to get user from request');
-        //    return;
-        //}
         User.findById(req.params.id)
-            .then(function (user) {
-                req.log.debug(user, 'getting channels for user.');
-                return user.getChannels();
-            }).done(function(data) {
-                res.status(200).send(data);
-            }, function(err) {
-                controllers.respondError(req, res, err);
-            });
+        .then(function (user) {
+            req.log.debug(user, 'getting channels for user.');
+            if (req.query.nonSubscribedOnly) {
+                return user.getAvailableChannels();
+            }
+            return user.getChannels();
+        }).then(function(data) {
+            res.status(200).send(data);
+        }).catch(function (err) {
+            controllers.respondError(req, res, err);
+        });
     },
     createChannel: function (req, res) {
         if (!req.body.name) {
@@ -71,24 +68,22 @@ controllers = {
         });
     },
     subscribeChannel: function (req, res) {
-        //var user = req.user;
-        //if (!user) {
-        //    req.log.info('Unable to get user from req obj');
-        //    res.status(401).send('Unable to get user from request');
-        //    return;
-        //}
-        var user = new User({_id:req.params.id});
         var cid = req.body.channel_id;
         if (!cid) {
             controllers.respondError(req, res, 'missing channel_id');
             return;
         }
-        if (!User.prototype.isPrototypeOf(user)) {
-            user = new User(user);
-        }
-        user.subscribeChannel(cid).done(function(r) {
-            res.status(200).send(r);
-        }, function(err) {
+        User.findById(req.params.id)
+        .then(function (user) {
+            req.log.debug(user, 'subscribing channel for user.');
+            return user.subscribeChannel(cid)
+        }).then(function (r) {
+            return Channel.Channel.findById(cid);
+        }).then(function (channel) {
+            MessageController.joinUserToChannel(req.params.id, channel);
+            req.log.debug(channel, 'successfully subscribed user to channel.');
+            res.status(200).send({ ok: true, channel: channel });
+        }).catch(function(err) {
             controllers.respondError(req, res, err);
         });
     },
@@ -151,12 +146,14 @@ controllers = {
         if (status) {
             res_status = status;
         }
-        else if (err.message.indexOf('missing ') === 0
-            || err.message.indexOf('invalid ') === 0) {
-            res_status = 400;
-        }
-        else if (err.message.indexOf('not found') > 0) {
-            res_status = 404;
+        else if (err.message.indexOf) {
+            if (err.message.indexOf('missing ') === 0
+                || err.message.indexOf('invalid ') === 0) {
+                res_status = 400;
+            }
+            else if (err.message.indexOf('not found') > 0) {
+                res_status = 404;
+            }
         }
         res.status(res_status).send({ ok: false, error: err });
         req.log.error(err.message);

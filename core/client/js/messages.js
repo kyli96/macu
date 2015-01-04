@@ -3,6 +3,7 @@ var API = require('./api'),
     MessageClient = require('./components/messageclient'),
     ChannelHeader = require('./components/channelheader'),
     CreateChannel = require('./components/createchannel');
+var JoinChannel = require('./components/JoinChannel');
 var ServerActionCreators = require('./actions/ServerActionCreators');
 var CoreAppDispatcher = require('./dispatcher/CoreAppDispatcher');
 var ChannelStore = require('./stores/ChannelStore');
@@ -46,6 +47,9 @@ var Mf = {
                 case ActionTypes.CLICK_CREATE_CHANNEL:
                     Mf.onClickCreateChannel();
                     break;
+                case ActionTypes.CLICK_MORE_CHANNELS:
+                    Mf.renderJoinChannel();
+                    break;
                 default:
                     // no-op
             }
@@ -69,6 +73,15 @@ var Mf = {
     renderMessageClient: function () {
         React.render(React.createElement(MessageClient, null), 
             $('#client_body')[0]);
+    },
+    renderJoinChannel: function () {
+        if ($('#more_channels_modal').length === 0) {
+            $(document.body).append($('<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">')
+                .attr('id', 'more_channels_modal'));
+            React.render(React.createElement(JoinChannel), $('#more_channels_modal')[0], function () {
+                $('#more_channels_modal').modal();
+            });
+        }
     },
     sendMsg: function (t_id, msg) {
         if (!t_id) {

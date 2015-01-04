@@ -63,6 +63,15 @@ User.prototype.getChannels = function () {
     //return Channels.findByDomain(this.domain);
 }
 
+User.prototype.getAvailableChannels = function () {
+    var self = this;
+    var query = {
+        domain: self.domain,
+        owner: { $ne: self._id },
+        _id: { $nin: self.subscribed }
+    };
+    return Channels.find(query, {});
+}
 Users = {
     subscribeChannelForDomain: function (domain, channel_id) {
         if (!domain) {

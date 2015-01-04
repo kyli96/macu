@@ -1,10 +1,11 @@
 ﻿var cookieParser = require('cookie-parser'),
     passportSocketio = require('passport.socketio'),
     session = require('express-session'),
+    config = require('config'),
     authentication;
 
 var sessionStore = new session.MemoryStore();
-var COOKIE_SECRET = 'little secret';
+var COOKIE_SECRET = config.get('Core.cookie.secret');
 
 function onIoAuthorizeSuccess(data, next) {
     data.log.info(data['user'].email + ' successful connection to socket.io');

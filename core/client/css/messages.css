@@ -239,3 +239,27 @@ textarea{width:460px;height:120px;padding:.5rem;font-size:15px;line-height:1.2re
   margin:0;color:#3d3c40;
   outline:0;position:absolute;bottom:0;height:100%;min-height:41px !important;padding:9px 5px 9px 8px;max-height:10rem;resize:none !important}
 #message-input.with-emoji-menu{padding:9px 30px 9px 8px}
+.modal_channel{
+  cursor: pointer;
+  padding: 4px 8px 4px;
+  border-bottom: 1px solid #e3e3e3;
+}
+.modal_channel:hover{
+  background: #b5cde1;
+}
+.modal_channel_name{
+  font-weight: 900;
+}
+.modal-content-items .message {
+  color: #3d3c40;
+}
+.modal-content-items .active
+{
+  background: #337ab7;
+}
+.modal-content-items .active,
+.modal-content-items .active .modal_channel_name,
+.modal-content-items .active .message
+{
+  color: #fff;
+}
