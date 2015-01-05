@@ -78,7 +78,7 @@ Channel.prototype.recordMsg = function (msg) {
         ts: msg.ts
     };
     var message = new Message(values);
-    return message.save();
+    return message.saveAsync().spread(function (message, numChanged) { return message });
 }
 
 module.exports = {

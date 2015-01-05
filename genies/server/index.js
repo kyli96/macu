@@ -6,6 +6,7 @@
     routes;
 
 dummyBot = function (req, res) {
+    req.log.debug(req);
     var payload = req.body;
     if (payload.msg.toLowerCase().indexOf('what is the unix time now?') !== -1) {
         res.send({ msg: 'it\'s ' + Date.now() + '.' });

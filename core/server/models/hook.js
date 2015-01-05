@@ -1,58 +1,39 @@
-﻿var CollectionBase = require('./collectionBase'),
-    Promise = require('bluebird'),
-    Util = require('util'),
-    ObjectID = require('mongodb').ObjectID;
+﻿var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var Promise = require('bluebird');
 
-function Hook(values) {
-    Hook.super_.call(this, Hook.collectionName);
-    this.className = 'Hook';
+Promise.promisifyAll(mongoose);
 
-    this._id = values._id || null;
-    this.name = values.name || '';
-    this.events = [];
-    this.t_id = values.t_id || '';
-    this.active = values.active ? true : false;
-    this.config = {};
-    this.updated_at = values.updated_at;
-    this.created_at = values.created_at;
+var HookSchema = new Schema({
+    name: { type: String, trim: true, required: true },
+    events: [{ type: String, lowercase: true, trim: true }],
+    t_id: { type: String, trim: true, required: true },
+    active: { type: Boolean, default: false },
+    config: {
+        url: { type: String, trim: true, required: true },
+        content_type: { type: String, trim: true },
+        token: { type: String, trim: true },
+        secure: {type: Boolean, default: false}
+    },
+    updated_at: { type: Date },
+    created_at: { type: Date }
+});
 
-    if (this._id && !ObjectID.prototype.isPrototypeOf(this._id)) {
-        this._id = new ObjectID(this._id);
+HookSchema.pre('save', function (next) {
+    var now = new Date();
+    this.updated_at = now;
+    if (!this.created_at) {
+        this.created_at = now;
     }
-    if (Array.prototype.isPrototypeOf(values.events)) {
-        for (var i = 0; i < values.events.length; i++) {
-            this.events.push(values.events[i]);
-        }
-    }
-    if (values.config) {
-        this.config.url = values.config.url;
-        this.config.content_type = values.config.content_type;
-        this.config.token = values.config.token;
-        this.config.secure = values.config.secure ? true : false;
-    }
-    this._dbfields = ['name', 't_id', 'events', 'active', 'config'];
-}
-Util.inherits(Hook, CollectionBase);
+    next();
+});
 
-Hook.collectionName = 'hooks';
-
-Hook.findById = function (id) {
-    return CollectionBase.findById(Hook, id);
+HookSchema.statics = {
+    findByTargetId: function (t_id) {
+        return this.findAsync({ t_id: t_id });
+    }
 }
 
-Hook.findByTargetId = function (t_id) {
-    return CollectionBase.find(Hook, {t_id: t_id}, {}, null);
-}
-
-Hook.prototype.save = function () {
-    var self = this;
-    if (!self.name
-        || !self.t_id
-        || !self.config
-        || !self.config.url) {
-        return Promise.reject(new Error('missing required field(s)'));
-    }
-    return Hook.super_.prototype.save.apply(this);
-}
+var Hook = mongoose.model('Hook', HookSchema);
 
 module.exports = Hook;

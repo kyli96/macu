@@ -22,6 +22,7 @@ apiRoutes = function (){
     
     router.get('/channel/:channel_id/hook/:hook_id', apiControllers.getHook);
     router.post('/channel/:channel_id/hooks', apiControllers.createHook);
+    router.put('/channel/:channel_id/hook/:hook_id', apiControllers.updateHook);
 
     return router;
 }

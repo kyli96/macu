@@ -119,24 +119,35 @@ controllers = {
             controllers.respondError(req, res, 'missing hook id');
             return;
         }
-        Hook.findById(req.params.hook_id).done(function (obj) { 
-            res.status(200).send(obj.getView());
-        }, function(err) {
+        Hook.findByIdAsync(req.params.hook_id)
+        .then(function (obj) { 
+            res.status(200).send(obj);
+        }).catch(function (err) {
             controllers.respondError(req, res, err);
         });
     },
     createHook: function (req, res) {
         var hook = new Hook(req.body);
         hook.t_id = 'C' + req.params.channel_id;
-        hook.save().then(function (r) {
-            var status = 200;
-            if (!req.body._id) {
-                status = 201;
-                req.log.info('new hook created');
-            } else {
-                req.log.info('hook ' + req.body._id + ' updated');
+        hook.saveAsync().spread(function (r, count) {
+            req.log.info('new hook created');
+            res.status(201).send({ ok: true, ts: r.updated_at, url: '/api/channel/' + req.params.channel_id + '/hook/' + r._id });
+        }).catch(function (err) {
+            controllers.respondError(req, res, err);
+        });
+    },
+    updateHook: function (req, res) {
+        Hook.findByIdAsync(req.params.hook_id)
+        .then(function (obj) {
+            for (var key in req.body) {
+                if (key == '_id') {
+                    continue;
+                }
+                obj.set(key, req.body[key]);
             }
-            res.status(status).send({ ok: true, ts: r.updated_at, url: '/api/channel/' + req.params.channel_id + '/hook/' + r._id });
+            return obj.saveAsync();
+        }).spread(function (obj, count) { 
+            res.status(200).send(obj);
         }).catch(function (err) {
             controllers.respondError(req, res, err);
         });

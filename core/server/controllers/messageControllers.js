@@ -89,7 +89,6 @@ messageControllers = {
         }
     },
     processNewMessage: function (msg, logger, socket){
-        logger.debug(msg, 'processing new message');
         var hexCheck = new RegExp('^[0-9a-fA-F]{24}$');
         if ((msg.t_id.substring(0,1) != 'C')
             || !hexCheck.test(msg.t_id.substring(1))) {
@@ -101,20 +100,20 @@ messageControllers = {
             getTarget = Channel.Channel.findById;
         }
         return getTarget(msg.t_id.substring(1)).then(function (target) {
-                if (!target) {
-                    return Promise.reject(new Error('target not found'));
-                }
-                return target.recordMsg(msg);
-            }).then(function (doc) {
-                logger.debug(doc, 'broadcast new message');
-                if (!socket) {
-                    io.to(doc.t_id.substring(1)).emit('sendMsg', doc);
-                }
-                else {
-                    socket.broadcast.to(doc.t_id.substring(1)).emit('sendMsg', doc);
-                }
-                messageControllers.processHooks(doc, ['mention'], logger);
-            });
+            if (!target) {
+                return Promise.reject(new Error('target not found'));
+            }
+            return target.recordMsg(msg);
+        }).then(function (doc) {
+            logger.debug(doc, 'broadcast new message');
+            if (!socket) {
+                io.to(doc.t_id.substring(1)).emit('sendMsg', doc);
+            }
+            else {
+                socket.broadcast.to(doc.t_id.substring(1)).emit('sendMsg', doc);
+            }
+            messageControllers.processHooks(doc, ['mention'], logger);
+        });
     },
     processHooks: function (msg, events, logger) {
         if (!msg || !events) {
@@ -135,7 +134,8 @@ messageControllers = {
                     }
                     switch (events[j]) {
                         case 'mention':
-                            if (msg.msg.toLowerCase().indexOf(hook.name.toLowerCase() + ':') === 0) {
+                            if (msg.msg.toLowerCase().indexOf(hook.name.toLowerCase() + ':') === 0
+                                || msg.msg.toLowerCase().indexOf(hook.name.toLowerCase() + ',') === 0) {
                                 Request.post({
                                     url: Url.parse(hook.config.url),
                                     json: true,

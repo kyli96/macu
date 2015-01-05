@@ -1,7 +1,14 @@
 {
     "Core": {
         "mongoConfig": {
-            "url": "mongodb://localhost:27017/macu"
+            "url": "mongodb://localhost:27017/macu",
+            "options": { 
+                "server": { 
+                    "socketOptions": { 
+                        "keepAlive": 1 
+                    } 
+                } 
+            }
         },
         "cookie": { 
             "secret":  "little secret"
