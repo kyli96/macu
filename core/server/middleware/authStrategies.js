@@ -2,7 +2,7 @@
     Strategy = require('passport-strategy'),
     util = require('util'),
     lookup = require('../utils').lookup,
-    User = require('../models/user').User;
+    User = require('../models/user');
 
 function DomainStrategy(options, verify) {
     if (typeof options == 'function') {
@@ -54,9 +54,10 @@ passport.serializeUser(function (user, done) {
 });
 
 passport.deserializeUser(function (id, fn) {
-    User.findById(id).done(function(user) {
+    User.findByIdAsync(id)
+    .then(function (user) {
         fn(null, user);
-    }, function(err) {
+    }).catch(function (err) {
         fn(err);
     });
 });

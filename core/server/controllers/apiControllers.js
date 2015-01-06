@@ -1,6 +1,5 @@
 ﻿var Channel = require('../models/channel'),
-    User = require('../models/user').User,
-    Users = require('../models/user').Users,
+    User = require('../models/user'),
     Promise = require('bluebird'),
     Message = require('../models/message'),
     Hook = require('../models/hook'),
@@ -9,33 +8,34 @@
 
 controllers = {
     getUser: function (req, res) {
-        User.findById(req.params.id).done(function (results) {
+        User.findByIdAsync(req.params.id)
+        .then(function (results) {
             res.send(results);
-        }, function (err) {
+        }).catch(function (err) {
             controllers.respondError(req, res, err);
         });
     },
     getChannels: function (req, res) {
         var domain = req.params.domain;
-        var fn = Channel.Channels;
+        var promise;
         if (req.query.countOnly) {
-            fn = fn.countByDomain;
+            promise = Channel.getCountByDomain(domain);
         }
         else {
-            fn = fn.findByDomain;
+            promise = Channel.findByDomain(domain);
         }
-        fn(domain).done(function (results) {
+        promise.then(function (results) {
             var r = results;
             if (req.query.countOnly) {
                 r = { count: r };
             }
             res.send(r);
-        }, function(err) {
+        }).catch(function (err) {
             controllers.respondError(req, res, err);
         });
     },
     getUserChannels: function (req, res) {
-        User.findById(req.params.id)
+        User.findByIdAsync(req.params.id)
         .then(function (user) {
             req.log.debug(user, 'getting channels for user.');
             if (req.query.nonSubscribedOnly) {
@@ -53,17 +53,14 @@ controllers = {
             controllers.respondError(req, res, 'missing channel name');
             return;
         }
-        var channel = new Channel.Channel(req.body);
-        channel.save().then(function (obj) {
+        var channel = new Channel(req.body);
+        channel.saveAsync().spread(function (obj, count) {
             req.log.info('channel ' + obj._id + ' created.');
-            //if (channel.access == "public") {
-            //    return Users.subscribeChannelForDomain(obj.domain, obj._id);
-            //}
             return new Promise(function (resolve) { resolve(); })
-        }).done(function(r) {
+        }).then(function(r) {
             MessageController.onNewChannel(channel);
             res.status(200).send(channel);
-        }, function(err) {
+        }).catch(function(err) {
             controllers.respondError(req, res, err);
         });
     },
@@ -73,12 +70,12 @@ controllers = {
             controllers.respondError(req, res, 'missing channel_id');
             return;
         }
-        User.findById(req.params.id)
+        User.findByIdAsync(req.params.id)
         .then(function (user) {
             req.log.debug(user, 'subscribing channel for user.');
             return user.subscribeChannel(cid)
         }).then(function (r) {
-            return Channel.Channel.findById(cid);
+            return Channel.findByIdAsync(cid);
         }).then(function (channel) {
             MessageController.joinUserToChannel(req.params.id, channel);
             req.log.debug(channel, 'successfully subscribed user to channel.');
@@ -94,10 +91,12 @@ controllers = {
             controllers.respondError(req, res, 'invalid id');
             return;
         }
-        var channel = new Channel.Channel({_id:id});
-        channel.getHistory().done(function (r) {
+        Channel.findByIdAsync(id)
+        .then(function (channel) {
+            return channel.getHistory();
+        }).then(function (r) {
             res.send(r);
-        }, function(err) {
+        }).catch(function(err) {
             controllers.respondError(req, res, err);
         });
     },

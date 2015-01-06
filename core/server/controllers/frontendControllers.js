@@ -2,7 +2,7 @@
     passport = require('passport'),
     Promise = require('bluebird'),
     lookup = require('../utils').lookup,
-    User = require('../models/user').User,
+    User = require('../models/user'),
     controllers;
 
 controllers = {

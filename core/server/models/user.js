@@ -1,95 +1,65 @@
-﻿var CollectionBase = require('./collectionBase'),
-    ObjectID = require('mongodb').ObjectID,
-    Util = require('util'),
-    Channels = require('./channel').Channels,
-    Promise = require('bluebird'),
-    Users;
+﻿var Channel = require('./channel');
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var Promise = require('bluebird');
 
-function User(data) {
-    User.super_.call(this, User.collectionName);
-    this.className = 'User';
+Promise.promisifyAll(mongoose);
 
-    this._id = data._id || null;
-    this.name = data.name || '';
-    this.email = data.email || '';
-    this.domain = data.domain || '';
-    this.subscribed = data.subscribed || [];
-    this._dbfields = ['name', 'email', 'domain', 'subscribed'];
-}
-Util.inherits(User, CollectionBase);
+var UserSchema = new Schema({
+    name: { type: String, default: '' },
+    email: { type: String, default: '' },
+    domain: { type: String, default: '' },
+    subscribed: [Schema.Types.ObjectId],
+    updated_at: { type: Date },
+    created_at: { type: Date }
+});
 
-User.collectionName = 'users';
-
-User.findById = function (id) {
-    return CollectionBase.findById(User, id);
-}
-
-User.findBySignupInfo = function (domain, email, name) {
-    return CollectionBase.findOne(User, { domain: domain, $or: [{ email: email }, { name: name }] });
-}
-
-User.findByCredentials = function (domain, email, password) {
-    return CollectionBase.findOne(User, { domain: domain, email: email, password: password });
-}
-
-User.prototype.subscribeChannel = function(channel_id) {
-    if (!this._id) {
-        return Promise.reject(new Error('Cannot find user id'));
+UserSchema.pre('save', function (next) {
+    var now = new Date();
+    this.updated_at = now;
+    if (!this.created_at) {
+        this.created_at = now;
     }
-    var id = this._id;
-    if (!ObjectID.prototype.isPrototypeOf(id)) {
-        id = new ObjectID(id);
+    next();
+});
+
+UserSchema.statics = {
+    findBySignupInfo: function (domain, email, name) {
+        return this.findOneAsync({ domain: domain, $or: [{ email: email }, { name: name }] });
+    },
+    findByCredentials: function (domain, email, password) {
+        return this.findOneAsync({ domain: domain, email: email, password: password });
     }
-    var cid = channel_id;
-    if (!ObjectID.prototype.isPrototypeOf(cid)) {
-        cid = new ObjectID(cid);
-    }
-    var collection = new CollectionBase(User.collectionName);
-    return collection.updateOne({_id: id}, {$addToSet: {subscribed: cid}}, null);
 }
 
-User.prototype.getChannels = function () {
-    var self = this;
-    var query = {
-        $or: [
-            { owner: self._id }, 
-            { _id: { $in: self.subscribed } }
-        ]
-    };
-    return Channels.find(query, {}, null);
-    //if (!this.subscribed || this.subscribed.length == 0) {
-    //    return new Promise(function(resolve) {resolve([]);});
-    //}
-    //return Channels.findByDomain(this.domain);
-}
-
-User.prototype.getAvailableChannels = function () {
-    var self = this;
-    var query = {
-        domain: self.domain,
-        owner: { $ne: self._id },
-        _id: { $nin: self.subscribed }
-    };
-    return Channels.find(query, {});
-}
-Users = {
-    subscribeChannelForDomain: function (domain, channel_id) {
-        if (!domain) {
-            return Promise.reject( new Error('Missing domain'));
+UserSchema.methods = {
+    subscribeChannel: function (channel_id) {
+        if (!this._id) {
+            return Promise.reject(new Error('Cannot find user id'));
         }
-        if (!channel_id) {
-            return Promise.reject(new Error('Missing channel_id'));
-        }
-        var cid = channel_id;
-        if (!ObjectID.prototype.isPrototypeOf(cid)) {
-            cid = new ObjectID(cid);
-        }
-        var collection = new CollectionBase(User.collectionName);
-        return collection.updateMany({domain: domain}, {$addToSet: {subscribed: cid}}, null);
+        return this.update({$addToSet: {subscribed: cid}});
+    },
+    getChannels: function () {
+        var self = this;
+        var query = {
+            $or: [
+                { owner: self._id }, 
+                { _id: { $in: self.subscribed } }
+            ]
+        };
+        return Channel.findAsync(query);
+    },
+    getAvailableChannels: function () {
+        var self = this;
+        var query = {
+            domain: self.domain,
+            owner: { $ne: self._id },
+            _id: { $nin: self.subscribed }
+        };
+        return Channel.findAsync(query);
     }
 }
 
-module.exports = {
-    User: User,
-    Users: Users
-}
+var User = mongoose.model('User', UserSchema);
+
+module.exports = User;

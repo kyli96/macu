@@ -1,5 +1,4 @@
-﻿var User = require('../models/user').User,
-    Users = require('../models/user').Users,
+﻿var User = require('../models/user'),
     Channel = require('../models/channel'),
     Message = require('../models/message'),
     Hook = require('../models/hook'),
@@ -63,12 +62,10 @@ messageControllers = {
     onCreateChannel: function (data) {
         var socket = this;
         var log = socket.request.log;
-        var channel = new Channel.Channel(data);
-        channel.save().then(function (obj) {
+        var channel = new Channel(data);
+        channel.saveAsync()
+        .spread(function (obj, count) {
             log.info('channel ' + obj._id + ' created.');
-            //if (channel.access == "public") {
-            //    return Users.subscribeChannelForDomain(obj.domain, obj._id);
-            //}
             return new Promise(function (resolve) { resolve(); })
         }).then(function(r) {
             messageControllers.onNewChannel(channel);
@@ -97,9 +94,10 @@ messageControllers = {
         }
         var getTarget;
         if (msg.t_id.substring(0, 1) == 'C') {
-            getTarget = Channel.Channel.findById;
+            getTarget = Channel.findByIdAsync(msg.t_id.substring(1));
         }
-        return getTarget(msg.t_id.substring(1)).then(function (target) {
+        return getTarget
+        .then(function (target) {
             if (!target) {
                 return Promise.reject(new Error('target not found'));
             }

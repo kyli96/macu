@@ -1,7 +1,7 @@
 ﻿var authentication = require('./authentication'),
     sio = require('socket.io'),
     messageControllers = require('../controllers/messageControllers'),
-    User = require('../models/user').User,
+    User = require('../models/user'),
     Utils = require('../utils');
 
 function IoServer(httpServer, expApp) {
