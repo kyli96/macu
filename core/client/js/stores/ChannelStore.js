@@ -60,7 +60,10 @@ var ChannelStore = assign({}, EventEmitter.prototype, {
     getCurrentID: function() {
         return _currentCID;
     },
-    getCurrentChannel: function() {
+    getCurrentChannel: function () {
+        if (!_currentCID) {
+            return null;
+        }
         return _channels[_currentCID];
     },
     emitChange: function() {

@@ -11,6 +11,7 @@ var ChannelSchema = new Schema({
     description: { type: String, default: '' },
     domain: { type: String, default: '' },
     owner: Schema.Types.ObjectId,
+    includeAll: { type: Boolean, default: false},
     updated_at: { type: Date },
     created_at: { type: Date }
 });
@@ -30,6 +31,9 @@ ChannelSchema.statics = {
     },
     getCountByDomain: function (domain) {
         return this.countAsync({ domain: domain, access: 'public' });
+    },
+    getIncludeAllChannels: function (domain){
+        return this.findAsync({ domain: domain, access: 'public', includeAll: true });
     }
 }
 

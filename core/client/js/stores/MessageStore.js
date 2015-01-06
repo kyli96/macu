@@ -11,7 +11,10 @@ var CHANGE_EVENT = 'change';
 _messages = {};
 
 var MessageStore = assign({}, EventEmitter.prototype, {
-    loadChannelMessages: function(cid) {
+    loadChannelMessages: function (cid) {
+        if (!cid) {
+            return;
+        }
         API.getMsgs(cid, function(data){
             // TODO: race condition
             _messages[cid] = data;
@@ -62,10 +65,6 @@ MessageStore.dispatchToken = CoreAppDispatcher.register(function(payload){
             break;
         case ActionTypes.CHANGE_CHANNEL:
             MessageStore.loadChannelMessages(action.channel_id);
-            break;
-        case ActionTypes.RECEIVE_MESSAGES:
-            MessageStore.init(action.messages);
-            MessageStore.emitChange();
             break;
         case ActionTypes.NEW_MESSAGE:
             MessageStore.addNewMessage(action.message);

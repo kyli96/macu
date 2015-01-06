@@ -43,16 +43,30 @@ controllers = {
             var new_user = new User({ name: name, domain: domain, email: email, password:password });
             return new_user.saveAsync();
         }).spread(function (user, count) {
-            Channel.getCountByDomain(domain)
-            .then(function (count){
-                if (count > 0) {
-                    return new Promise(function (resolve) { resolve(); })
+            req.log.info(user, 'Successfully created user.');
+            Channel.getIncludeAllChannels(user.domain)
+            .then(function (channels){
+                if (channels && channels.length > 0) {
+                    req.log.debug(channels, 'Subscribing new user to includeAll channels.');
+                    var channel_ids = [];
+                    for (var i = 0; i < channels.length; i++) {
+                        channel_ids.push(channels[i]._id);
+                    }
+                    return user.subscribeChannels(channel_ids);
                 }
-                var general_channel = new Channel({ name: 'General', description: 'Something to get you started', domain: domain, owner: user._id });
+                var general_channel = new Channel({
+                    name: 'General', 
+                    description: 'Something to get you started', 
+                    domain: domain, 
+                    owner: user._id,
+                    includeAll: true
+                });
+                req.log.debug(general_channel, 'Creating general channel for new domain.');
                 return general_channel.saveAsync();
-            })
-        }).then(function () {
-            passport.authenticate('domain', { successRedirect: '/messages', failureRedirect: '/', failureFlash: true })(req, res);
+            }).finally(function (err) {
+                // swallowing channel errors
+                passport.authenticate('domain', { successRedirect: '/messages', failureRedirect: '/', failureFlash: true })(req, res);
+            });
         }).catch(function (err) {
             if (err) {
                 req.log.warn(err, 'Unable to signup user.');

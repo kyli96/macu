@@ -45,11 +45,11 @@ UserSchema.statics = {
 }
 
 UserSchema.methods = {
+    subscribeChannels: function (channel_ids) {
+        return this.updateAsync({$addToSet: {subscribed: { $each: channel_ids }}});
+    },
     subscribeChannel: function (channel_id) {
-        if (!this._id) {
-            return Promise.reject(new Error('Cannot find user id'));
-        }
-        return this.update({$addToSet: {subscribed: cid}});
+        return this.subscribeChannels([channel_id]);
     },
     getChannels: function () {
         var self = this;
