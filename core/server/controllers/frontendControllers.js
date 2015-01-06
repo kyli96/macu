@@ -3,6 +3,7 @@
     Promise = require('bluebird'),
     lookup = require('../utils').lookup,
     User = require('../models/user'),
+    Channel = require('../models/channel'),
     controllers;
 
 controllers = {
@@ -37,12 +38,19 @@ controllers = {
                 else if (user.name.trim() == name.trim()) {
                     req.flash('error', 'Your team already has a user with the same name.');
                 }
-                return;
+                return Promise.reject();
             }
-            var new_user = new User({ name: name, domain: domain, email: email });
-            new_user._dbfields.push('password');
-            new_user.password = password;
-            return new_user.save();
+            var new_user = new User({ name: name, domain: domain, email: email, password:password });
+            return new_user.saveAsync();
+        }).spread(function (user, count) {
+            Channel.getCountByDomain(domain)
+            .then(function (count){
+                if (count > 0) {
+                    return new Promise(function (resolve) { resolve(); })
+                }
+                var general_channel = new Channel({ name: 'General', description: 'Something to get you started', domain: domain, owner: user._id });
+                return general_channel.saveAsync();
+            })
         }).then(function () {
             passport.authenticate('domain', { successRedirect: '/messages', failureRedirect: '/', failureFlash: true })(req, res);
         }).catch(function (err) {

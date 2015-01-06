@@ -156,15 +156,6 @@ controllers = {
         if (status) {
             res_status = status;
         }
-        else if (err.message.indexOf) {
-            if (err.message.indexOf('missing ') === 0
-                || err.message.indexOf('invalid ') === 0) {
-                res_status = 400;
-            }
-            else if (err.message.indexOf('not found') > 0) {
-                res_status = 404;
-            }
-        }
         res.status(res_status).send({ ok: false, error: err });
         req.log.error(err.message);
         req.log.debug({ req: req, res: res, err: err }, err.message);

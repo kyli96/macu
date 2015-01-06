@@ -63,13 +63,14 @@ passport.deserializeUser(function (id, fn) {
 });
 
 passport.use(new DomainStrategy(function(domain, email, password, fn) {
-    User.findByCredentials(domain, email, password).done(function (user) {
-        if (!user) {
+    User.findByCredentials(domain, email)
+    .then(function (user) {
+        if (!user || !user.authenticate(password)) {
             fn(null, false, { message: 'The info you provided does not match our record. Please try again.' });
             return;
         }
         fn(null, user);
-    }, function (err){
+    }).catch(function (err){
         fn(err);
     })
 }));
