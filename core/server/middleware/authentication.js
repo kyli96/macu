@@ -1,10 +1,11 @@
 ﻿var cookieParser = require('cookie-parser'),
     passportSocketio = require('passport.socketio'),
     session = require('express-session'),
+    MongoStore = require('connect-mongostore')(session),
     config = require('config'),
     authentication;
 
-var sessionStore = new session.MemoryStore();
+var sessionStore = new MongoStore(config.get('Core.mongoStoreConfig'));
 var COOKIE_SECRET = config.get('Core.cookie.secret');
 
 function onIoAuthorizeSuccess(data, next) {
