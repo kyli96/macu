@@ -44,6 +44,7 @@ ChannelSchema.methods = {
     recordMsg: function (msg) {
         var values = {
             t_id: 'C' + this._id,
+            domain: this.domain,
             user_id: msg.user_id,
             name: msg.name,
             msg: msg.msg,

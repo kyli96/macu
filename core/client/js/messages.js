@@ -1,8 +1,8 @@
 var API = require('./api'),
     React = require('react'),
     MessageClient = require('./components/messageclient'),
-    ChannelHeader = require('./components/channelheader'),
     CreateChannel = require('./components/createchannel');
+var Header = require('./components/Header');
 var JoinChannel = require('./components/JoinChannel');
 var ServerActionCreators = require('./actions/ServerActionCreators');
 var CoreAppDispatcher = require('./dispatcher/CoreAppDispatcher');
@@ -67,7 +67,7 @@ var Mf = {
         var header_props = {
             domain: { name: UserStore.getData().domain }
         };
-        React.render(React.createElement(ChannelHeader, header_props),
+        React.render(React.createElement(Header, header_props),
             $('#header')[0]);
     },
     renderMessageClient: function () {

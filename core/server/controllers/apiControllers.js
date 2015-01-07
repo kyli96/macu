@@ -100,6 +100,21 @@ controllers = {
             controllers.respondError(req, res, err);
         });
     },
+    searchMessages: function (req, res) {
+        Channel.getCountByDomain(req.params.domain)
+        .then(function (count) {
+            if (!count) {
+                return Promise.reject('invalid domain or domain does not contain any channels');
+            }
+            return Message.search(req.params.domain, req.query.q.trim());
+        }).then(function (messages) {
+            req.log.info('Search messages returns ' + messages.length + ' results');
+            req.log.debug({ req: req }, 'Search messages returns ' + messages.length + ' results');
+            res.send(messages);
+        }).catch(function(err) {
+            controllers.respondError(req, res, err);
+        });
+    },
     postMessage: function (req, res) {
         if (!req.body.t_id) {
             controllers.respondError(req, res, 'missing target id');

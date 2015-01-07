@@ -6,6 +6,17 @@ apiRoutes = function (){
     var router = express.Router();
     router.get('/channel/:id/history', apiControllers.getChannelHistory);
     router.get('/:domain/channels', apiControllers.getChannels);
+    router.get('/:domain/messages/search', function (req, res) { 
+        if (!req.params.domain || req.params.domain.trim() == '') {
+            res.status(400).send('missing domain');
+            return;
+        }
+        if (!req.query.q || req.query.q.trim() == '') {
+            res.status(400).send('unsupported action');
+            return;
+        }
+        apiControllers.searchMessages(req, res);
+    });
     router.get('/user/:id/channels', apiControllers.getUserChannels);
     router.post('/channels', apiControllers.createChannel);
     

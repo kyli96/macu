@@ -5,6 +5,7 @@
   "main": "./core/index",
   "scripts": {
     "start": "node server | bunyan",
+    "build": "browserify ./core/client/js/main.js | uglifyjs -cm > ./core/client/js/build/bundle.js",
     "watch": "watchify ./core/client/js/main.js -o ./core/client/js/build/bundle.js -v -d"
   },
   "dependencies": {
