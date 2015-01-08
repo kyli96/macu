@@ -1,4 +1,5 @@
 ﻿var React = require('react');
+var SearchActionCreators = require('../actions/SearchActionCreators');
 
 var SearchContainer = React.createClass( {
     _onChange: function (e) {
@@ -6,6 +7,7 @@ var SearchContainer = React.createClass( {
     },
     _onSubmit: function (e) { 
         e.preventDefault();
+        SearchActionCreators.search(this.state.text);
     },
     _onFocus: function (e) { 
         this.setState({ search_focused: true });

@@ -1,4 +1,3 @@
-var React = require('react');
 var CoreAppDispatcher = require('../dispatcher/CoreAppDispatcher');
 var Constants = require('../constants/CoreConstants');
 var EventEmitter = require('events');

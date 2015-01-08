@@ -2,9 +2,10 @@ var UserStore = require('./stores/UserStore');
 var ServerActionCreators = require('./actions/ServerActionCreators');
 
 var API = {
-    get: function(url, fn) {
+    get: function(url, data, fn) {
         $.ajax({
-            url: '/api' + url
+            url: '/api' + url,
+            data: data
         }).done(function (data) {
             fn(data);
         });
@@ -36,16 +37,16 @@ var API = {
         if (countOnly) {
             url += '?countOnly=1';
         }
-        API.get(url, fn);
+        API.get(url, null, fn);
     },
     getMsgs: function (cid, fn) {
-        API.get('/channel/'+cid+'/history', fn);
+        API.get('/channel/'+cid+'/history', null, fn);
     },
     getChannels: function (fn) {
-        API.get('/user/'+UserStore.getData()._id+'/channels', fn);
+        API.get('/user/'+UserStore.getData()._id+'/channels', null, fn);
     },
     getAvailableChannels: function (filter, fn) {
-        API.get('/user/' + UserStore.getData()._id + '/channels?nonSubscribedOnly=1', function (data) {
+        API.get('/user/' + UserStore.getData()._id + '/channels?nonSubscribedOnly=1', null, function (data) {
             ServerActionCreators.receiveDomainChannels(data);
             if (fn) {
                 fn(data);
@@ -60,6 +61,14 @@ var API = {
         API.put('/user/' + UserStore.getData()._id, data, function (result) {
             if (result && result.ok && result.channel) {
                 ServerActionCreators.joinedChannel(result.channel);
+            }
+        });
+    },
+    search: function (search_terms, fn) {
+        API.get('/search', { domain: UserStore.getData().domain, q: search_terms }, function (data) {
+            ServerActionCreators.receiveSearchResults(data);
+            if (fn) {
+                fn(data);
             }
         });
     }

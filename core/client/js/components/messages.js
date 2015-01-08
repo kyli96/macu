@@ -13,16 +13,20 @@ var last_ts = null;
 
 var Message = React.createClass( {
     render: function () {
-        var showDayDivider = function(ts) {
+        var showDayDivider = function (ts) {
+            if (!this.props.showDayDivider) {
+                return '';
+            }
             var show = '';
             var d = new Date(ts);
+            var td = new Date();
             if (!last_ts) {
-                show = d.toDateString();
+                show = (d.getDate() == td.getDate()) ? 'Today' : d.toDateString();
             }
             else {
                 var t = new Date(last_ts);
                 if (t.toDateString() != d.toDateString()) {
-                    show = d.toDateString();
+                    show = (d.getDate() == td.getDate()) ? 'Today' : d.toDateString();
                 }
             }
             last_ts = ts;
@@ -35,14 +39,20 @@ var Message = React.createClass( {
                     </div>
                 );
             }
-        }
+        }.bind(this);
         var displayTime = function(ts) {
             var d = new Date(ts);
+            var addZero = function (i) {
+                if (i < 10) {
+                    i = '0' + i;
+                }
+                return i;
+            }
             if (d.getHours()>12) {
-                return (d.getHours()-12)+':'+d.getMinutes()+'PM';
+                return (d.getHours()-12)+':'+addZero(d.getMinutes())+'PM';
             }
             else {
-                return d.getHours()+':'+d.getMinutes()+'AM';
+                return d.getHours()+':'+addZero(d.getMinutes())+'AM';
             }
         }
         return (
@@ -77,7 +87,7 @@ var MessageList = React.createClass({
     },
     render: function () {
         var renderMessage = function (message) {
-            return <Message key={message.ts} msg={message} />;
+            return <Message key={message.ts} msg={message} showDayDivider={true} />;
         };
         return (
             <div id="msgs_div">{this.state.msgs.map(renderMessage)}</div>
@@ -86,3 +96,4 @@ var MessageList = React.createClass({
 });
 
 module.exports = MessageList;
+module.exports.Message = Message;

@@ -3,7 +3,7 @@ var Scrollers = require('./scroller');
 var Wf = {
     init: function () {
         $(window).on('resize', function () {
-            Wf.resizeChannelsCol();
+            Wf.resizeCols();
             Wf.resizeMessageScrollDiv();
             Wf.resizeMsgFiller();
             if (Scrollers.scrollPanes['messages_scroll_div']) {
@@ -11,15 +11,18 @@ var Wf = {
             }
         }).trigger('resize');
     },
-    resizeChannelsCol: function () {
+    resizeCols: function () {
         $('#channels_col').height($(window).height() - $('#header').height());
+        $('#side_pane').height($(window).height() - $('#header').height());
+        $('#side_pane').offset({ top: $('#header').height() });
     },
     resizeMessageScrollDiv: function () {
         var scroll_div = $('#messages_scroll_div');
-        var msgs_div = $('#msgs_div');
         var scroll_div_height = $(window).height() - $('#footer').height() - $('#header').height();
         scroll_div.height(scroll_div_height);
-        scroll_div.width($(window).width() - $('#channels_col').width());
+        scroll_div.width($(window).width() - $('#channels_col').width() - $('#side_pane').width());
+        $('#search_results_scroll_div').height($('#side_pane').height());
+        $('#search_results_scroll_div').width($('#side_pane').width());
     },
     resizeMsgFiller: function () {
         var msgs_div = $('#msgs_div');

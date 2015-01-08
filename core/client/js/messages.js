@@ -3,6 +3,7 @@ var API = require('./api'),
     MessageClient = require('./components/messageclient'),
     CreateChannel = require('./components/createchannel');
 var Header = require('./components/Header');
+var SidePane = require('./components/SidePane');
 var JoinChannel = require('./components/JoinChannel');
 var ServerActionCreators = require('./actions/ServerActionCreators');
 var CoreAppDispatcher = require('./dispatcher/CoreAppDispatcher');
@@ -11,36 +12,38 @@ var Constants = require('./constants/CoreConstants');
 var UserStore = require('./stores/UserStore');
 var ActionTypes = Constants.ActionTypes;
 var ResizeUtils = require('./resizeUtils');
+var Scrollers = require('./scroller');
 
 var Mf = {
     init: function () {
         Mf.socket = io();
         Mf.socket.on('profile', function (obj) {
             ServerActionCreators.receiveProfile(obj);
-
-            API.getChannels(function(data){
+            
+            API.getChannels(function (data) {
                 ServerActionCreators.receiveChannels(data);
-
+                
                 Mf.initMessageInput();
             });
-            API.getDomainChannels(obj.domain, true, function(data) {
+            API.getDomainChannels(obj.domain, true, function (data) {
                 if (!data || !data.count) {
                     return;
                 }
                 ServerActionCreators.receiveDomainChannelCount(data);
             });
-        
+            
             Mf.renderHeader();
             Mf.renderMessageClient();
+            Mf.renderSidePane();
             ResizeUtils.init();
         })
         Mf.socket.on('sendMsg', ServerActionCreators.receiveNewMessage);
         Mf.socket.on('newChannel', ServerActionCreators.receiveNewChannel);
-
-        CoreAppDispatcher.register(function(payload){
+        
+        CoreAppDispatcher.register(function (payload) {
             var action = payload.action;
-
-            switch(action.type) {
+            
+            switch (action.type) {
                 case ActionTypes.RECEIVE_CHANNELS:
                     CoreAppDispatcher.waitFor([ChannelStore.dispatchToken]);
                     break;
@@ -50,13 +53,19 @@ var Mf = {
                 case ActionTypes.CLICK_MORE_CHANNELS:
                     Mf.renderJoinChannel();
                     break;
+                case ActionTypes.TOGGLE_SIDE_PANE:
+                    Mf.onToggleSidePane();
+                    break;
+                case ActionTypes.RECEIVE_SEARCH_RESULTS:
+                    Mf.showSidePane();
+                    break;
                 default:
                     // no-op
             }
         });
     },
-    initMessageInput: function() {
-        $('form').submit(function () {
+    initMessageInput: function () {
+        $('#message-form').submit(function () {
             var msg = $('#message-input').val();
             Mf.sendMsg('C' + ChannelStore.getCurrentID(), msg);
             $('#message-input').val('');
@@ -73,6 +82,10 @@ var Mf = {
     renderMessageClient: function () {
         React.render(React.createElement(MessageClient, null), 
             $('#client_body')[0]);
+    },
+    renderSidePane: function () {
+        React.render(React.createElement(SidePane, null), 
+            $('#side_pane')[0]);
     },
     renderJoinChannel: function () {
         if ($('#more_channels_modal').length === 0) {
@@ -119,6 +132,21 @@ var Mf = {
         Mf.socket.emit('createChannel', channel);
         if ($('#create_channel_modal').length) {
             $('#create_channel_modal').modal('hide');
+        }
+    },
+    onToggleSidePane: function () {
+        $('#client-ui').toggleClass('showing_side_pane');
+        ResizeUtils.resizeMessageScrollDiv();
+        if (Scrollers.scrollPanes['messages_scroll_div']) {
+            Scrollers.scrollPanes['messages_scroll_div'].update();
+        }
+        if (Scrollers.scrollPanes['search_results_scroll_div']) {
+            Scrollers.scrollPanes['search_results_scroll_div'].update();
+        }
+    },
+    showSidePane: function () {
+        if (!$('#client-ui').hasClass('showing_side_pane')) {
+            Mf.onToggleSidePane();
         }
     }
 };

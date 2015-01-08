@@ -39,6 +39,9 @@ MacuScroller.prototype.update = function () {
     var content_height = 0;
     this.content.each(function () { content_height += $(this).height() + parseInt($(this).css('padding-top')) + parseInt($(this).css('padding-bottom')); })
     this.content_height = content_height;
+    console.log(this.scroll_div.attr('id'));
+    console.log(this.scroll_div.height());
+    console.log(content_height);
     if (this.scroll_div.height() < content_height) {
         this.bar.height(this.scroll_div.height() - parseInt(this.bar.css('margin-top')) - parseInt(this.bar.css('margin-bottom')));
         this.handle.height(this.bar.height() * this.scroll_div.height() / content_height);

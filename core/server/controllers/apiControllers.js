@@ -101,12 +101,12 @@ controllers = {
         });
     },
     searchMessages: function (req, res) {
-        Channel.getCountByDomain(req.params.domain)
+        Channel.getCountByDomain(req.query.domain)
         .then(function (count) {
             if (!count) {
                 return Promise.reject('invalid domain or domain does not contain any channels');
             }
-            return Message.search(req.params.domain, req.query.q.trim());
+            return Message.search(req.query.domain, req.query.q.trim());
         }).then(function (messages) {
             req.log.info('Search messages returns ' + messages.length + ' results');
             req.log.debug({ req: req }, 'Search messages returns ' + messages.length + ' results');

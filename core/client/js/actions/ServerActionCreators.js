@@ -45,5 +45,11 @@ module.exports = {
             type: ActionTypes.JOINED_CHANNEL,
             channel: data
         });
+    },
+    receiveSearchResults: function(data) {
+        CoreAppDispatcher.handleServerAction({
+            type: ActionTypes.RECEIVE_SEARCH_RESULTS,
+            results: data
+        });
     }
 };
