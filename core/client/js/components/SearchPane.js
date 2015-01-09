@@ -2,7 +2,7 @@
 var SearchStore = require('../stores/SearchStore');
 var MessageList = require('./messages.js');
 var Message = MessageList.Message;
-var resizeUtils = require('../resizeUtils');
+var ResizeUtils = require('../resizeUtils');
 var Scrollers = require('../scroller');
 
 var SearchPane = React.createClass({
@@ -13,10 +13,14 @@ var SearchPane = React.createClass({
         SearchStore.addChangeListener(this._onChange);
     },
     _onChange: function () {
-        this.setState({ results: SearchStore.getResults() }, function () { 
+        this.setState({ results: SearchStore.getResults() }, function () {
+            console.log('searchpane');
+            ResizeUtils.resizeMessageScrollDiv();
             if (!Scrollers.scrollPanes['search_results_scroll_div']) {
+            console.log('init in searchpane');
                 Scrollers.init('search_results_scroll_div');
             } else {
+            console.log('update in searchpane');
                 Scrollers.scrollPanes['search_results_scroll_div'].update();
             }
         });
@@ -43,9 +47,14 @@ var SearchPane = React.createClass({
         }
         return (
 <div id="search_tab" className={_className}>
-<div id="search_results_scroll_div">
+<div id="search_result_container">
+<div className="heading">
+<div id="search_heading" className="inline-block">Search Results</div>
+</div>
+<div id="search_results_scroll_div" className="side_pane_scroll_div macu_scroller">
 <div id="search_message_results">
 {this.state.results.map(renderMessage)}
+</div>
 </div>
 </div>
 </div>

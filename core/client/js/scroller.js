@@ -39,14 +39,12 @@ MacuScroller.prototype.update = function () {
     var content_height = 0;
     this.content.each(function () { content_height += $(this).height() + parseInt($(this).css('padding-top')) + parseInt($(this).css('padding-bottom')); })
     this.content_height = content_height;
-    console.log(this.scroll_div.attr('id'));
-    console.log(this.scroll_div.height());
-    console.log(content_height);
+    this.hider.width(this.scroll_div.width() + parseInt(this.scroll_div.css('padding-left')) + parseInt(this.scroll_div.css('padding-right'))
+        - this.handle.width() - this.handle_border);
+    this.bar.css('margin-left', this.hider.width() + (parseInt(this.hider.css('margin-right')) - this.bar.width()) / 2);
     if (this.scroll_div.height() < content_height) {
         this.bar.height(this.scroll_div.height() - parseInt(this.bar.css('margin-top')) - parseInt(this.bar.css('margin-bottom')));
         this.handle.height(this.bar.height() * this.scroll_div.height() / content_height);
-        this.hider.width(this.scroll_div.width() - this.handle.width() - this.handle_border);
-        this.bar.css('margin-left', this.hider.width());
         if (this.stickBottom) {
             this.gotoBottom();
         }

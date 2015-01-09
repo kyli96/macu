@@ -2,7 +2,11 @@
   font-size: 100%;
 }
 body { 
-  font: 16px Helvetica, Arial; 
+  font: 16px Helvetica, Arial;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 @-ms-viewport{
   width: device-width;
@@ -110,8 +114,6 @@ input.search_input{display:inline-block;margin-bottom:0;margin-right:.5rem;borde
 .search_form .search_input{padding:2px 2rem;font-size:15px;width:100%;border-radius:40px;background:#fff;border:1px solid #c9cbcd}
 .search_form .search_input::-ms-clear{display:none}
 .search_form .search_input:focus{-webkit-box-shadow:inset 0 1px 2px 0 rgba(0,0,0,0.15);-moz-box-shadow:inset 0 1px 2px 0 rgba(0,0,0,0.15);box-shadow:inset 0 1px 2px 0 rgba(0,0,0,0.15)}
-.search_message_result{background:white;font-size:15px;line-height:18px;margin:0 .5rem 8px 0;padding:8px .25rem 0 .25rem;font-family:'Lato',sans-serif;color:#3d3c40;word-wrap:break-word;cursor:pointer;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;position:relative;border:0;border-top:2px solid #f5f5f5}
-.search_message_result:first-child{border-top:0;padding-top:0}
 .search_message_result .msg_actions,.search_message_result .day_divider,.search_message_result .delete_attachment_link{display:none}
 
 #active_channel_name{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;margin:0 1rem 0 0;font-family:'Lato',sans-serif;display:block;height:53px;line-height:53px;-webkit-transitionDISABLED:.15s .2s ease-out;-moz-transitionDISABLED:.15s .2s ease-out;-o-transitionDISABLED:.15s .2s ease-out;transitionDISABLED:.15s .2s ease-out;-webkit-transitionDISABLED:.15s;-moz-transitionDISABLED:.15s;-o-transitionDISABLED:.15s;transitionDISABLED:.15s;color:#9e9ea6;font-size:1rem;font-weight:500}
@@ -188,8 +190,7 @@ input.search_input{display:inline-block;margin-bottom:0;margin-right:.5rem;borde
 #messages_container {
   margin-left: 220px;
 }
-#messages_scroll_div,
-#search_results_scroll_div {
+#messages_scroll_div{
   overflow-y: auto;
   outline: 0;
 }
@@ -209,8 +210,7 @@ input.search_input{display:inline-block;margin-bottom:0;margin-right:.5rem;borde
   overflow-y:hidden;
   overflow-x:hidden;
 }
-#msgs_div .message,
-#search_message_results .message {
+.message {
   padding: .25rem 2rem .1rem 3rem;
   font-size: 15px;
   line-height: 22px;
@@ -351,10 +351,12 @@ input.search_input{display:inline-block;margin-bottom:0;margin-right:.5rem;borde
   box-shadow: 0 1px 10px #e3e3e3;
   z-index: 3;
   overflow: hidden;
+  /*
   margin-top: 5px;
   padding-left: 8px;
   padding-right: 8px;
   padding-bottom: 4px;
+    */
   border-radius: 7px;
   background: #fff;
   border: 1px solid #e3e3e3;
@@ -362,14 +364,16 @@ input.search_input{display:inline-block;margin-bottom:0;margin-right:.5rem;borde
   -webkit-transition: border-color .1s;
   transition: border-color .1s;
 }
+/*
 .search_result_with_extract:first-child{margin-top:8px}
+  */
 .search_result_with_extract:hover{border:1px solid #439fe0}
 .search_result_with_extract .message{margin-top:4px !important}
 .search_message_result {
   background: white;
   font-size: 15px;
   line-height: 18px;
-  margin: 0 .5rem 8px 0;
+  margin: 0 .5rem 0 0;
   padding: 8px .25rem 0 .25rem;
   font-family: 'Lato',sans-serif;
   color: #3d3c40;
@@ -383,5 +387,24 @@ input.search_input{display:inline-block;margin-bottom:0;margin-right:.5rem;borde
   border: 0;
   border-top: 2px solid #f5f5f5;
 }
+#client-ui #search_message_results {
+  margin: 0 1px 0 0;
+  padding: 0;
+}
 .search_message_result:first-child{border-top:0;padding-top:0}
 .search_message_result .msg_actions,.search_message_result .day_divider,.search_message_result .delete_attachment_link{display:none}
+.search_message_result .message {
+  padding-right: 0;
+}
+.side_pane_scroll_div {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 1rem 0 0;
+  word-wrap: break-word;
+}
+.side_pane_scroll_div{
+  padding-left: 0;
+}
+#search_result_container .heading{border-bottom:0;height:44px;padding-right:.75rem}
+#side_pane_content .heading{width:100%;padding:.5rem .5rem .5rem .75rem;background:#fbfaf8;font-family:'Lato',sans-serif;font-size:1.2rem;line-height:1.8rem;min-height:2.75rem;font-weight:900;color:#555459;border-bottom:1px solid #e0e0e0;position:relative;z-index:50}
+.macu_scroller::-webkit-scrollbar{width:0;height:0}

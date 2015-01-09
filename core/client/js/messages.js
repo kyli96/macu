@@ -135,12 +135,14 @@ var Mf = {
         }
     },
     onToggleSidePane: function () {
+        console.log('messages.js');
         $('#client-ui').toggleClass('showing_side_pane');
         ResizeUtils.resizeMessageScrollDiv();
         if (Scrollers.scrollPanes['messages_scroll_div']) {
             Scrollers.scrollPanes['messages_scroll_div'].update();
         }
         if (Scrollers.scrollPanes['search_results_scroll_div']) {
+            console.log('update in messages');
             Scrollers.scrollPanes['search_results_scroll_div'].update();
         }
     },
