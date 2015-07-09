@@ -1,11 +1,11 @@
 ﻿var React = require('react');
-var SearchPane = require('./SearchPane');
+var SearchPane = require('./SearchPane.jsx');
 
 var SidePane = React.createClass( {
     render: function () {
         return (
 <div id="side_pane_content">
-<SearchPane />
+<SearchPane locales={this.props.locales} messages={this.props.messages} />
 </div>
         );
     }

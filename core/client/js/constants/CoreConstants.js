@@ -13,6 +13,7 @@ module.exports = {
         CLICK_CREATE_CHANNEL: null,
         CLICK_MORE_CHANNELS: null,
         CLICK_JOIN_CHANNEL: null,
+        GOTO_MESSAGE: null,
         RECEIVE_PROFILE: null,
         RECEIVE_SEARCH_RESULTS: null,
         TOGGLE_SIDE_PANE: null

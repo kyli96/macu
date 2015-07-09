@@ -39,6 +39,9 @@ ul, ol {
 }
 label,button,input[type="button"],input[type="reset"],input[type="submit"],input[type="radio"],input[type="checkbox"]{cursor:pointer}
 .top_margin{margin-top:1rem !important}
+#channels_list .join_channel{
+  margin-right: 50px;
+}
 .list_more{display:inline-block;font-size:.8rem;font-weight:700;color:#ab9ba9 !important;border-bottom:1px dotted #ab9ba9;-webkit-transitionDISABLED:.1s .2s ease-out;-moz-transitionDISABLED:.1s .2s ease-out;-o-transitionDISABLED:.1s .2s ease-out;transitionDISABLED:.1s .2s ease-out;-webkit-transitionDISABLED:.1s;-moz-transitionDISABLED:.1s;-o-transitionDISABLED:.1s;transitionDISABLED:.1s;margin:.25rem 1rem}
 .list_more:hover{color:white !important;text-decoration:none;border-bottom:1px solid white}
 .modal-header{padding:.5rem 1rem;background:#f2f2f5;color:#555459;font-weight:900;border-bottom:0;-webkit-border-top-right-radius:.25rem;-webkit-border-bottom-right-radius:0;-webkit-border-bottom-left-radius:0;-webkit-border-top-left-radius:.25rem;-moz-border-radius-topright:.25rem;-moz-border-radius-bottomright:0;-moz-border-radius-bottomleft:0;-moz-border-radius-topleft:.25rem;border-top-right-radius:.25rem;border-bottom-right-radius:0;border-bottom-left-radius:0;border-top-left-radius:.25rem;-moz-background-clip:padding-box;-webkit-background-clip:padding-box;background-clip:padding-box}

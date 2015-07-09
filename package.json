@@ -6,11 +6,13 @@
   "scripts": {
     "start": "node server | bunyan",
     "build": "browserify ./core/client/js/main.js | uglifyjs -cm > ./core/client/js/build/bundle.js",
+    "build_login": "browserify ./core/client/js/login.js | uglifyjs -cm > ./core/client/js/build/login.js",
     "watch": "watchify ./core/client/js/main.js -o ./core/client/js/build/bundle.js -v -d"
   },
   "dependencies": {
     "bluebird": "^2.4.2",
     "body-parser": "^1.10.0",
+    "bson": "^0.2.18",
     "bunyan": "^1.2.3",
     "config": "^1.9.0",
     "connect-flash": "^0.1.1",
@@ -30,6 +32,7 @@
     "passport-strategy": "^1.0.0",
     "passport.socketio": "^3.4.1",
     "react": "^0.12.2",
+    "react-intl": "^1.0.2",
     "request": "^2.51.0",
     "socket.io": "^1.2.1"
   },

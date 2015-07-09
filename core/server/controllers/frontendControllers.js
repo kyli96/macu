@@ -1,17 +1,20 @@
-﻿var path = require('path'),
-    passport = require('passport'),
-    Promise = require('bluebird'),
-    lookup = require('../utils').lookup,
-    User = require('../models/user'),
-    Channel = require('../models/channel'),
-    controllers;
+﻿var path = require('path');
+var passport = require('passport');
+var Promise = require('bluebird');
+var lookup = require('../utils').lookup;
+var User = require('../models/user');
+var Channel = require('../models/channel');
+var Team = require('../models/team');
+var controllers;
 
 controllers = {
     showSignin: function (req, res) {
-        res.render(path.join(__dirname, '/../views/login'), { layout: 'outside', user: req.user, message: req.flash('error') });
+        res.render(path.join(__dirname, '/../views/login'), 
+            { layout: 'outside', user: req.user, locale: req.locale, message: req.flash('error'), show: 'login' });
     },
     showSignup: function (req, res) {
-        res.render(path.join(__dirname, '/../views/signup'), { layout: 'outside', user: req.user, message: req.flash('error') });
+        res.render(path.join(__dirname, '/../views/login'), 
+            { layout: 'outside', user: req.user, locale: req.locale, message: req.flash('error'), show: 'signup' });
     },
     processSignup: function (req, res) {
         var domain = lookup(req.body, 'domain');
@@ -19,6 +22,8 @@ controllers = {
         var email = lookup(req.body, 'email');
         var password = lookup(req.body, 'password');
         var confirm_password = lookup(req.body, 'confirm_password');
+        var team = null;
+        var user = null;
 
         if (!domain || !name || !email || !password || !confirm_password) {
             req.flash('error', 'Please fill in all fields.');
@@ -30,20 +35,30 @@ controllers = {
             res.redirect('/signup');
             return;
         }
-        User.findBySignupInfo(domain.trim(), email.trim(), name.trim()).then(function (user){
-            if (user && user._id) {
-                if (user.email.trim() == email.trim()) {
-                    req.flash('error', 'Your team already has a user with the same email.');
-                }
-                else if (user.name.trim() == name.trim()) {
-                    req.flash('error', 'Your team already has a user with the same name.');
-                }
+        Team.findByName(domain.trim()).then(function (team) {
+            if (team && team._id) {
+                req.flash('error', 'There\'s already a Team ' + domain.trim() + '.');
                 return Promise.reject();
             }
+            return User.findOneAsync({ email: email.trim() });
+        }).then(function (existing_user){
+            if (existing_user && existing_user._id) {
+                if (!existing_user.authenticate(password)) {
+                    req.flash('error', 'Your passwod does not match our record.');
+                    return Promise.reject();
+                }
+                return Promise.resolve([existing_user, 1]);
+            }
             var new_user = new User({ name: name, domain: domain, email: email, password:password });
+            req.log.info(new_user, 'Creating new user');
             return new_user.saveAsync();
-        }).spread(function (user, count) {
-            req.log.info(user, 'Successfully created user.');
+        }).spread(function (new_user, count) {
+            user = new_user;
+            var new_team = new Team({ name: domain.trim(), owner: user._id });
+            req.log.info(new_team, 'Creating new team');
+            return new_team.saveAsync();
+        }).spread(function (new_team, count) {
+            team = new_team;
             Channel.getIncludeAllChannels(user.domain)
             .then(function (channels){
                 if (channels && channels.length > 0) {
@@ -77,7 +92,8 @@ controllers = {
     },
     showMessages: function (req, res) {
         var context = {
-            user: req.user
+            user: req.user,
+            locale: req.locale
         };
         res.render(path.join(__dirname, '/../views/messages'), context);
     }

@@ -9,6 +9,7 @@ var ActionTypes = Constants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
 _messages = {};
+_gotoMessage = null;
 
 var MessageStore = assign({}, EventEmitter.prototype, {
     loadChannelMessages: function (cid) {
@@ -18,6 +19,23 @@ var MessageStore = assign({}, EventEmitter.prototype, {
         API.getMsgs(cid, function(data){
             // TODO: race condition
             _messages[cid] = data;
+            if (data.length) {
+                _gotoMessage = data[data.length - 1]._id;
+            }
+            else {
+                _gotoMessage = null;
+            }
+            MessageStore.emitChange();
+        });
+    },
+    gotoMessage: function (msg) {
+        if (!msg || !msg.t_id) {
+            return;
+        }
+        var cid = msg.t_id.substring(1);
+        API.getMsgs(cid, function (data) {
+            _messages[cid] = data;
+            _gotoMessage = msg._id;
             MessageStore.emitChange();
         });
     },
@@ -33,6 +51,9 @@ var MessageStore = assign({}, EventEmitter.prototype, {
             return [];
         }
     },
+    getFocusId: function () {
+        return _gotoMessage;
+    },
     addNewMessage: function(message) {
         if (message.t_id.substring(0, 1) == 'C') {
             if (!_messages[message.t_id.substring(1)]) {
@@ -41,6 +62,7 @@ var MessageStore = assign({}, EventEmitter.prototype, {
             else {
                 _messages[message.t_id.substring(1)].push(message);
             }
+            _gotoMessage = null;
             MessageStore.emitChange();
         }
     },
@@ -63,12 +85,15 @@ MessageStore.dispatchToken = CoreAppDispatcher.register(function(payload){
             CoreAppDispatcher.waitFor([ChannelStore.dispatchToken]);
             MessageStore.loadChannelMessages(ChannelStore.getCurrentID());
             break;
+        case ActionTypes.GOTO_MESSAGE:
+            CoreAppDispatcher.waitFor([ChannelStore.dispatchToken]);
+            MessageStore.gotoMessage(action.msg);
+            break;
         case ActionTypes.CHANGE_CHANNEL:
             MessageStore.loadChannelMessages(action.channel_id);
             break;
         case ActionTypes.NEW_MESSAGE:
             MessageStore.addNewMessage(action.message);
-            MessageStore.emitChange();
             break;
         case ActionTypes.JOINED_CHANNEL:
             CoreAppDispatcher.waitFor([ChannelStore.dispatchToken]);

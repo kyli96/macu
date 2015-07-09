@@ -1,16 +1,9 @@
-  <div class="wrapper">
-    <form method="post" action="/login" class="form-signin">
-      <h2 class="form-signin-heading">Please login</h2>
-      {{#if message}}
-      <p>{{message}}</p>
-      {{/if}}
-      <input type="text" class="form-control" name="domain" placeholder="Team Name" required="" autofocus="" />
-      <input type="text" class="form-control" name="email" placeholder="Email" required="" " />
-      <input type="password" class="form-control last-input" name="password" placeholder="Password" required="" />
-      <label class="checkbox">
-        <input type="checkbox" value="remember-me" id="rememberMe" name="rememberMe"> Remember me
-      </label>
-      <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
-      <p>Or <a href="/signup">Sign Up Here</a></p>
-    </form>
-  </div>
+  <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="http://fb.me/react-0.12.2.min.js"></script>
+  {{{includeLocale locale}}}
+  <script>
+    var locale = '{{locale}}';
+    var message = "{{message}}";
+    var show = "{{show}}";
+  </script>
+  <script src="/js/build/login.js"></script>

@@ -84,6 +84,12 @@ ChannelStore.dispatchToken = CoreAppDispatcher.register(function(payload){
             _currentCID = action.channel_id;
             ChannelStore.emitChange();
             break;
+        case ActionTypes.GOTO_MESSAGE:
+            if (action.msg.t_id && _currentCID != action.msg.t_id.substring(1)) {
+                _currentCID = action.msg.t_id.substring(1);
+                ChannelStore.emitChange();
+            }
+            break;
         case ActionTypes.RECEIVE_CHANNELS:
             ChannelStore.init(action.channels);
             ChannelStore.emitChange();

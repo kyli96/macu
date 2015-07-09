@@ -244,3 +244,6 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+
+# npm logs
+npm-debug.log*

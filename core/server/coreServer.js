@@ -17,8 +17,8 @@ CoreServer.prototype.start = function () {
     self.ioServer = new Messenger(httpServer, self.rootApp);
     self.ioServer.init();
 
-    self.httpServer.listen(3000, function () {
-        self.rootApp.log.info('Server listening at *:3000');
+    self.httpServer.listen((process.env.PORT || 3000), function () {
+        self.rootApp.log.info('Server listening at *:' + self.httpServer.address().port);
     });
 }
 

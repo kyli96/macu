@@ -1,10 +1,10 @@
-var API = require('./api'),
-    React = require('react'),
-    MessageClient = require('./components/messageclient'),
-    CreateChannel = require('./components/createchannel');
-var Header = require('./components/Header');
-var SidePane = require('./components/SidePane');
-var JoinChannel = require('./components/JoinChannel');
+var API = require('./api');
+var React = require('react');
+var MessageClient = require('./components/messageclient.jsx');
+var CreateChannel = require('./components/createchannel.jsx');
+var Header = require('./components/Header.jsx');
+var SidePane = require('./components/SidePane.jsx');
+var JoinChannel = require('./components/JoinChannel.jsx');
 var ServerActionCreators = require('./actions/ServerActionCreators');
 var CoreAppDispatcher = require('./dispatcher/CoreAppDispatcher');
 var ChannelStore = require('./stores/ChannelStore');
@@ -80,18 +80,18 @@ var Mf = {
             $('#header')[0]);
     },
     renderMessageClient: function () {
-        React.render(React.createElement(MessageClient, null), 
+        React.render(React.createElement(MessageClient, i18n), 
             $('#client_body')[0]);
     },
     renderSidePane: function () {
-        React.render(React.createElement(SidePane, null), 
+        React.render(React.createElement(SidePane, i18n), 
             $('#side_pane')[0]);
     },
     renderJoinChannel: function () {
         if ($('#more_channels_modal').length === 0) {
             $(document.body).append($('<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">')
                 .attr('id', 'more_channels_modal'));
-            React.render(React.createElement(JoinChannel), $('#more_channels_modal')[0], function () {
+            React.render(React.createElement(JoinChannel, i18n), $('#more_channels_modal')[0], function () {
                 $('#more_channels_modal').modal();
             });
         }
@@ -115,7 +115,9 @@ var Mf = {
             $(document.body).append($('<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">')
                 .attr('id', 'create_channel_modal'));
             var props = {
-                onClickSave: Mf.createChannel
+                onClickSave: Mf.createChannel,
+                locales: i18n.locales,
+                messages: i18n.messages
             };
             React.render(React.createElement(CreateChannel, props), $('#create_channel_modal')[0], function () {
                 $('#create_channel_modal').modal();
@@ -135,14 +137,12 @@ var Mf = {
         }
     },
     onToggleSidePane: function () {
-        console.log('messages.js');
         $('#client-ui').toggleClass('showing_side_pane');
         ResizeUtils.resizeMessageScrollDiv();
         if (Scrollers.scrollPanes['messages_scroll_div']) {
             Scrollers.scrollPanes['messages_scroll_div'].update();
         }
         if (Scrollers.scrollPanes['search_results_scroll_div']) {
-            console.log('update in messages');
             Scrollers.scrollPanes['search_results_scroll_div'].update();
         }
     },

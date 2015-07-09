@@ -10,7 +10,8 @@ function getStateFromStores() {
     };
 }
 
-var ChannelsCol = React.createClass({
+var ChannelsCol = React.createClass( {
+    mixins: [ReactIntlMixin],
     getInitialState: function() {
         return getStateFromStores();
     },
@@ -52,18 +53,24 @@ var ChannelsCol = React.createClass({
             var more = this.state.domainChannelCount - this.state.channels.length;
             if (more > 0) {
                 return (
-                    <a className="join_channel list_more" onClick={this._onClickMoreChannels}>+{more} more</a>
+                    <a className="join_channel list_more" onClick={this._onClickMoreChannels}>
+                        {this.formatMessage(this.getIntlMessage('channel.listMore'), {total: more})}
+                    </a>
                     );
             }
             return '';
         }.bind(this);
         return (
             <div id="channels" className="section_holder">
-              <h2 id="channels_header" className="hoverable">Channels</h2>
+                <h2 id="channels_header" className="hoverable">
+                    {this.formatMessage(this.getIntlMessage('channel.channels'))}
+                </h2>
               <ul id="channels_list">
                 {this.state.channels.map(createItem)}
                 {joinChannel()}
-                <a className="create_channel list_more" onClick={this._onClickCreateChannel}>Create Channel</a>
+                <a className="create_channel list_more" onClick={this._onClickCreateChannel}>
+                    {this.formatMessage(this.getIntlMessage('channel.createChannel'))}...
+                </a>
               </ul>
             </div>
         );

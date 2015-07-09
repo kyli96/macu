@@ -1,19 +1,19 @@
 ﻿var React = require('react'),
-    ChannelsCol = require('./channels'),
-    MessageList = require('./messages');
+    ChannelsCol = require('./channels.jsx'),
+    MessageList = require('./messages.jsx');
 
 var MessageClient = React.createClass({
-    render: function() {
+    render: function () {
         return (
             <div className="row">
               <div id="channels_col">
-                <ChannelsCol />
+                <ChannelsCol locales={this.props.locales} messages={this.props.messages} />
               </div>
               <div id="messages_container">
                   <div id="messages_scroll_div">
                     <div id="message_filler"></div>
                     <div id="message_front"></div>
-                    <MessageList />
+                    <MessageList locales={this.props.locales} messages={this.props.messages} />
                   </div>
               </div>
             </div>

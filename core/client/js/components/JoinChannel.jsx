@@ -9,6 +9,7 @@ function getStateFromStores() {
 }
 
 var JoinChannel = React.createClass({
+    mixins: [ReactIntlMixin],
     getInitialState: function() {
         return getStateFromStores();
     },
@@ -45,7 +46,7 @@ var JoinChannel = React.createClass({
 			  <div className="modal-content">
       			<div className="modal-header">
         		  <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        		  <h4 className="modal-title">Join Channel</h4>
+        		  <h4 className="modal-title">{this.formatMessage(this.getIntlMessage('channel.joinChannel'))}</h4>
       			</div>
       			<div className="modal-body">
                   <div id="join_channels_scroll_div">
@@ -55,8 +56,12 @@ var JoinChannel = React.createClass({
                   </div>
       			</div>
       			<div className="modal-footer">
-        		  <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>
-        		  <button type="button" className="btn btn-primary" onClick={this._onClickJoin}>Join</button>
+                  <button type="button" className="btn btn-default" data-dismiss="modal">
+                  {this.formatMessage(this.getIntlMessage('common.cancel'))}
+                  </button>
+                  <button type="button" className="btn btn-primary" onClick={this._onClickJoin}>
+                  {this.formatMessage(this.getIntlMessage('channel.join'))}
+                  </button>
       			</div>
 			  </div>
 			</div>

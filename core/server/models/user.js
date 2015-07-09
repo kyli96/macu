@@ -36,9 +36,6 @@ UserSchema.pre('save', function (next) {
 });
 
 UserSchema.statics = {
-    findBySignupInfo: function (domain, email, name) {
-        return this.findOneAsync({ domain: domain, $or: [{ email: email }, { name: name }] });
-    },
     findByCredentials: function (domain, email) {
         return this.findOneAsync({ domain: domain, email: email });
     }

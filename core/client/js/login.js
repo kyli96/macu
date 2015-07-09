@@ -1,8 +1,13 @@
-var init = function () {
-    var Messenger = require('./messages');
-    Messenger.init();
-}
-
+﻿var init = function () {
+    var Login = require('./components/login.jsx');
+    var props = {
+        locales: i18n.locales,
+        messages: i18n.messages,
+        message: message,
+        show: show
+    };
+    React.render(React.createElement(Login, props), document.body);
+};
 jQuery.cachedScript = function (url, options) {
     options = $.extend(options || {}, {
         dataType: "script",

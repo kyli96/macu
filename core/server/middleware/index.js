@@ -13,6 +13,7 @@
     createReqLog,
     init;
 
+var supportedLocales = ['en-US', 'zh-TW'];
 
 init = function (coreApp, apiApp){
     authStragegies = authStrategies;
@@ -45,6 +46,15 @@ init = function (coreApp, apiApp){
                     return options.fn(this);
                 }
                 return '';
+            },
+            includeLocale: function (locale) {
+                var lang = locale.substring(0, 2);
+                if (lang != 'zh') {
+                    return '';
+                }
+                return (
+                    '<script src="/js/i18n/react-intl/' + lang + '.js"></script>'
+                );
             }
         }
     });
@@ -54,6 +64,10 @@ init = function (coreApp, apiApp){
     coreApp.use('/messages', authentication.authorizeExpress());
     // coreApp.use('/api', authentication.authorizeExpress());
     
+    coreApp.use(function (req, res, next) {
+        req.locale = (req.acceptsLanguages(supportedLocales) || supportedLocales[0]).toLowerCase();
+        next();
+    });
     apiApp.use(function (req, res, next) {
         req.log = Utils.createLogger('req', apiApp.log, req);
         next();

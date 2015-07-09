@@ -1,6 +1,6 @@
 ﻿var React = require('react');
-var ChannelHeader = require('./channelheader');
-var SearchContainer = require('./SearchContainer');
+var ChannelHeader = require('./channelheader.jsx');
+var SearchContainer = require('./SearchContainer.jsx');
 var SidePaneActionCreators = require('../actions/SidePaneActionCreators');
 var SearchStore = require('../stores/SearchStore');
 

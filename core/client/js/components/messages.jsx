@@ -5,13 +5,15 @@ var Scrollers = require('../scroller');
 
 function getStateFromStores() {
     return {
-        msgs: MessageStore.getCurrentChannelMessages()
+        msgs: MessageStore.getCurrentChannelMessages(),
+        focus: MessageStore.getFocusId()
     };
 }
 
 var last_ts = null;
 
 var Message = React.createClass( {
+    mixins: [ReactIntlMixin],
     render: function () {
         var showDayDivider = function (ts) {
             if (!this.props.showDayDivider) {
@@ -21,12 +23,12 @@ var Message = React.createClass( {
             var d = new Date(ts);
             var td = new Date();
             if (!last_ts) {
-                show = (d.getDate() == td.getDate()) ? 'Today' : d.toDateString();
+                show = (d.getDate() == td.getDate()) ? this.formatMessage(this.getIntlMessage('message.today')) : d.toDateString();
             }
             else {
                 var t = new Date(last_ts);
                 if (t.toDateString() != d.toDateString()) {
-                    show = (d.getDate() == td.getDate()) ? 'Today' : d.toDateString();
+                    show = (d.getDate() == td.getDate()) ? this.formatMessage(this.getIntlMessage('message.today')) : d.toDateString();
                 }
             }
             last_ts = ts;
@@ -55,10 +57,14 @@ var Message = React.createClass( {
                 return d.getHours()+':'+addZero(d.getMinutes())+'AM';
             }
         }
+        var className = 'message';
+        if (this.props.focus) {
+            className += ' focus';
+        }
         return (
             <div>
             {showDayDivider(this.props.msg.ts)}
-            <div className="message">
+            <div className={className}>
               <a className="message_sender">{this.props.msg.name}</a>
               <a className="timestamp">{displayTime(this.props.msg.ts)}</a>
               <span className="message_content">{this.props.msg.msg}</span>
@@ -83,12 +89,24 @@ var MessageList = React.createClass({
             } else {
                 Scrollers.scrollPanes['messages_scroll_div'].update();
             }
-        });
+            if (this.state.focus) {
+                Scrollers.scrollPanes['messages_scroll_div'].gotoElement($('#msgs_div .focus'));
+            }
+        }.bind(this));
     },
     render: function () {
         var renderMessage = function (message) {
-            return <Message key={message.ts} msg={message} showDayDivider={true} />;
-        };
+            var focus = (this.state.focus == message._id);
+            return (
+                <Message 
+                    key={message.ts} 
+                    msg={message} 
+                    showDayDivider={true} 
+                    locales={this.props.locales} 
+                    messages={this.props.messages}
+                    focus={focus} />
+            );
+        }.bind(this);
         return (
             <div id="msgs_div">{this.state.msgs.map(renderMessage)}</div>
         );

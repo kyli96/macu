@@ -1,11 +1,13 @@
 ﻿var React = require('react');
 var SearchStore = require('../stores/SearchStore');
-var MessageList = require('./messages.js');
+var MessageList = require('./messages.jsx');
 var Message = MessageList.Message;
 var ResizeUtils = require('../resizeUtils');
 var Scrollers = require('../scroller');
+var SearchActionCreators = require('../actions/SearchActionCreators');
 
 var SearchPane = React.createClass({
+    mixins: [ReactIntlMixin],
 	getInitialState: function() {
 		return {active: false, results: SearchStore.getResults()};
     },
@@ -14,15 +16,13 @@ var SearchPane = React.createClass({
     },
     _onChange: function () {
         this.setState({ results: SearchStore.getResults() }, function () {
-            console.log('searchpane');
             ResizeUtils.resizeMessageScrollDiv();
             if (!Scrollers.scrollPanes['search_results_scroll_div']) {
-            console.log('init in searchpane');
                 Scrollers.init('search_results_scroll_div');
             } else {
-            console.log('update in searchpane');
                 Scrollers.scrollPanes['search_results_scroll_div'].update();
             }
+            Scrollers.scrollPanes['search_results_scroll_div'].gotoTop();
         });
     },
     _onShow: function (){
@@ -31,33 +31,36 @@ var SearchPane = React.createClass({
     _onHide: function () {
         this.setState({ active: false });
     },
+    _onClickMessage: function(msg) {
+        SearchActionCreators.clickMessageResult(msg);
+    },
     render: function () {
         var renderMessage = function (message) {
             return (
-<div className="search_message_result" key={message._id}>
-<div className="search_result_with_extract">
-<Message key={message.ts} msg={ message} showDayDivider={ false} />
-</div>
-</div>
+                <div className="search_message_result" onClick={this._onClickMessage.bind(this, message)} key={message._id}>
+                  <div className="search_result_with_extract">
+                    <Message key={message.ts} msg={ message} showDayDivider={ false} />
+                  </div>
+                </div>
             );
-        };
+        }.bind(this);
         var _className = "tab-pane";
         if (this.state.active) {
             _className += " active";
         }
         return (
-<div id="search_tab" className={_className}>
-<div id="search_result_container">
-<div className="heading">
-<div id="search_heading" className="inline-block">Search Results</div>
-</div>
-<div id="search_results_scroll_div" className="side_pane_scroll_div macu_scroller">
-<div id="search_message_results">
-{this.state.results.map(renderMessage)}
-</div>
-</div>
-</div>
-</div>
+            <div id="search_tab" className={_className}>
+              <div id="search_result_container">
+                <div className="heading">
+                  <div id="search_heading" className="inline-block">{this.formatMessage(this.getIntlMessage('search.searchResults'))}</div>
+                </div>
+                <div id="search_results_scroll_div" className="side_pane_scroll_div macu_scroller">
+                  <div id="search_message_results">
+                    {this.state.results.map(renderMessage)}
+                  </div>
+                </div>
+              </div>
+            </div>
         );
     }
 });
